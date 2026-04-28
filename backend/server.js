@@ -20,6 +20,7 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 const db = 'mongodb://localhost:27017/bookExchangeDB';
 mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })

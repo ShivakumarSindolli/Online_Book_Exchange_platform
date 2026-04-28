@@ -104,31 +104,71 @@ export default function BrowseBooks({ token }) {
 
           return (
             <div key={book._id} className="col">
-              <div className="card card-ui h-100 overflow-hidden">
-                <div className="image-overlay-container">
-                  {book.imageUrl ? (<img src={book.imageUrl} className="card-img-top" alt={book.title} style={{ height: '250px', objectFit: 'cover' }} />) : (<ImagePlaceholder />)}
-                  <div className="image-overlay-content"><h5 className="mb-1">Condition</h5><p className="fs-4 fw-bold">{book.condition}</p></div>
+              <div className="card card-ui h-100 shadow-sm">
+                <div className="position-relative">
+                  <div className="image-overlay-container" style={{ height: '280px', overflow: 'hidden' }}>
+                    {book.imageUrl ? (
+                      <img
+                        src={`http://localhost:5000${book.imageUrl}`}
+                        className="w-100 h-100"
+                        alt={book.title}
+                        style={{
+                          objectFit: 'cover',
+                          objectPosition: 'center',
+                          borderRadius: '0.375rem 0.375rem 0 0'
+                        }}
+                      />
+                    ) : (
+                      <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light border-bottom" style={{ borderRadius: '0.375rem 0.375rem 0 0' }}>
+                        <i className="bi bi-book text-muted" style={{ fontSize: '3rem' }}></i>
+                      </div>
+                    )}
+                    <div className="image-overlay-content">
+                      <h6 className="mb-2 text-white">Book Condition</h6>
+                      <span className="badge bg-light text-dark fs-6 px-3 py-2">{book.condition}</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="card-body d-flex flex-column p-3">
-                  <div className="mb-2"><span className={`badge rounded-pill text-bg-${book.type === 'sell' ? 'success' : 'info'}`}>{book.type === 'sell' ? `For Sale: $${book.price}` : 'For Lend'}</span></div>
-                  <h5 className="card-title fw-semibold">{book.title}</h5>
-                  <p className="card-text text-muted small mb-3">by {book.author}</p>
-                  <div className="small text-muted"><i className="bi bi-person me-2"></i>{book.userId.username}</div>
-                  <div className="small text-muted"><i className="bi bi-geo-alt me-2"></i>{book.city}, {book.state}</div>
-                  
-                  <div className="mt-auto pt-3 d-grid gap-2">
-                    <button onClick={() => handleRequest(book._id)} className={`btn ${isOwner ? 'btn-outline-secondary' : 'btn-primary'}`} disabled={isOwner}>
-                      {isOwner ? 'This is Your Book' : 'Request Book'}
+                  <div className="mb-2">
+                    <span className={`badge ${book.type === 'sell' ? 'bg-success' : 'bg-info'} fs-6 px-3 py-2`}>
+                      {book.type === 'sell' ? `$${book.price}` : 'Available to Lend'}
+                    </span>
+                  </div>
+                  <h6 className="card-title fw-bold mb-2 text-truncate" title={book.title}>
+                    {book.title}
+                  </h6>
+                  <p className="card-text text-muted small mb-2">
+                    <i className="bi bi-person-fill me-1"></i>
+                    {book.author}
+                  </p>
+                  <div className="mb-3">
+                    <div className="small text-muted mb-1">
+                      <i className="bi bi-person-circle me-2"></i>
+                      {book.userId.username}
+                    </div>
+                    <div className="small text-muted">
+                      <i className="bi bi-geo-alt-fill me-2"></i>
+                      {book.city}, {book.state}
+                    </div>
+                  </div>
+
+                  <div className="mt-auto d-grid gap-2">
+                    <button
+                      onClick={() => handleRequest(book._id)}
+                      className={`btn ${isOwner ? 'btn-outline-secondary' : 'btn-primary'} btn-sm`}
+                      disabled={isOwner}
+                    >
+                      {isOwner ? 'Your Book' : 'Request Book'}
                     </button>
-                    {/* --- NEW WISHLIST BUTTON WITH CONDITIONAL LOGIC --- */}
                     {!isOwner && token && (
-                      <button 
+                      <button
                         className="btn btn-outline-warning btn-sm"
                         onClick={() => handleAddToWishlist(book._id)}
                         disabled={isInWishlist}
                       >
-                        <i className="bi bi-star-fill me-1"></i> 
-                        {isInWishlist ? 'In Your Wishlist' : 'Add to Wishlist'}
+                        <i className="bi bi-star-fill me-1"></i>
+                        {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
                       </button>
                     )}
                   </div>

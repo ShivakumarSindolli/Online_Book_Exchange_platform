@@ -105,7 +105,7 @@ export default function Wishlist({ token }) {
                                     {wishlist.map(book => (
                                         <tr key={book._id}>
                                             <td>
-                                                <img src={book.imageUrl || 'https://via.placeholder.com/60x80?text=No+Image'} alt={book.title} style={{ width: '60px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                <img src={book.imageUrl ? `http://localhost:5000${book.imageUrl}` : 'https://via.placeholder.com/60x80?text=No+Image'} alt={book.title} style={{ width: '60px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
                                             </td>
                                             <td>{book.title}</td>
                                             <td>{book.author}</td>
