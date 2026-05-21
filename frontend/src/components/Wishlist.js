@@ -14,121 +14,107 @@ export default function Wishlist({ token }) {
         if (!token) return;
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/user/wishlist', {
+            const res = await fetch('http://127.0.0.1:5000/api/user/wishlist', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!res.ok) {
-                 const errorData = await res.json();
-                 throw new Error(errorData.message || 'Failed to fetch wishlist');
-            }
+            if (!res.ok) throw new Error('Failed to fetch wishlist');
             const data = await res.json();
-            if (Array.isArray(data)) {
-                setWishlist(data);
-            } else {
-                setWishlist([]);
-            }
+            setWishlist(Array.isArray(data) ? data : []);
         } catch (error) {
             toast.error(error.message);
             setWishlist([]);
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     }, [token]);
 
     useEffect(() => {
-        if (!token) {
-            navigate('/login');
-        } else {
-            fetchWishlist();
-        }
+        if (!token) navigate('/login');
+        else fetchWishlist();
     }, [token, navigate, fetchWishlist]);
-
-    const handleRemoveClick = (book) => {
-        setBookToRemove(book);
-        setShowConfirmModal(true);
-    };
-
-    const handleCloseModal = () => {
-        setBookToRemove(null);
-        setShowConfirmModal(false);
-    };
 
     const handleConfirmRemove = async () => {
         if (!bookToRemove) return;
         try {
-            await fetch(`http://localhost:5000/api/user/wishlist/${bookToRemove._id}`, {
+            await fetch(`http://127.0.0.1:5000/api/user/wishlist/${bookToRemove._id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            toast.success('Book removed from your wishlist!');
-            setWishlist(prevWishlist => prevWishlist.filter(book => book._id !== bookToRemove._id));
-        } catch (error) {
-            toast.error(error.message);
-        } finally {
-            handleCloseModal();
-        }
+            toast.success('Removed from wishlist');
+            setWishlist(prev => prev.filter(book => book._id !== bookToRemove._id));
+        } catch (error) { toast.error(error.message); }
+        finally { setShowConfirmModal(false); setBookToRemove(null); }
     };
 
-    if (loading) {
-        return <div className="text-center p-5"><h4>Loading your wishlist...</h4></div>;
-    }
+    if (loading) return (
+      <div className="text-center p-5" style={{ height: '50vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="spinner-border text-warning" role="status"><span className="visually-hidden">Loading...</span></div>
+      </div>
+    );
 
     return (
-        <div className="container py-4">
-            <ConfirmationModal
-                show={showConfirmModal}
-                onClose={handleCloseModal}
-                onConfirm={handleConfirmRemove}
-                title="Remove from Wishlist"
-                confirmText="Yes, Remove"
-                confirmButtonClass="btn-danger"
-            >
-                <p>Are you sure you want to remove <strong>"{bookToRemove?.title}"</strong> from your wishlist?</p>
+        <div className="container py-4 animate-fadeInUp">
+            <ConfirmationModal show={showConfirmModal} onClose={() => setShowConfirmModal(false)} onConfirm={handleConfirmRemove} title="Remove from Wishlist" confirmText="Remove" confirmButtonClass="btn-danger">
+                <p>Remove <strong style={{color:'var(--text-primary)'}}>"{bookToRemove?.title}"</strong> from your wishlist?</p>
             </ConfirmationModal>
 
-            <h2 className="mb-4">My Wishlist</h2>
-            {wishlist.length > 0 ? (
-                <div className="card card-ui">
-                    <div className="card-body">
-                        <div className="table-responsive">
-                            <table className="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th style={{ width: '10%' }}>Image</th>
-                                        <th>Title</th>
-                                        <th>Author</th>
-                                        <th>Owner</th>
-                                        <th className="text-end">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {wishlist.map(book => (
-                                        <tr key={book._id}>
-                                            <td>
-                                                <img src={book.imageUrl ? `http://localhost:5000${book.imageUrl}` : 'https://via.placeholder.com/60x80?text=No+Image'} alt={book.title} style={{ width: '60px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
+            <h2 className="mb-4 section-heading"><i className="bi bi-star-fill me-2 text-warning"></i>My Wishlist</h2>
+            
+            <div className="card card-ui border-0">
+                <div className="card-body p-0">
+                    <div className="table-responsive">
+                        <table className="table table-hover align-middle mb-0">
+                            <thead style={{ background: 'rgba(255,255,255,0.02)' }}>
+                                <tr>
+                                    <th style={{ width: '80px', paddingLeft: '1.5rem' }}>Cover</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Owner</th>
+                                    <th className="text-end" style={{ paddingRight: '1.5rem' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {wishlist.length > 0 ? (
+                                    wishlist.map((book, i) => (
+                                        <tr key={book._id} className={`animate-fadeInUp delay-${(i % 5) + 1}`}>
+                                            <td style={{ paddingLeft: '1.5rem' }}>
+                                                {book.imageUrl ? (
+                                                    <img src={`http://127.0.0.1:5000${book.imageUrl}`} alt={book.title} style={{ width: '50px', height: '70px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-glass)' }} />
+                                                ) : (
+                                                    <div style={{ width: '50px', height: '70px', background: 'var(--bg-glass)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                      <i className="bi bi-book text-muted"></i>
+                                                    </div>
+                                                )}
                                             </td>
-                                            <td>{book.title}</td>
-                                            <td>{book.author}</td>
-                                            <td>{book.userId?.username || 'N/A'}</td>
-                                            <td className="text-end">
-                                                <button className="btn btn-danger btn-sm" onClick={() => handleRemoveClick(book)}>
-                                                    <i className="bi bi-trash-fill me-1"></i> Remove
+                                            <td className="fw-bold" style={{ color: 'var(--text-primary)' }}>{book.title}</td>
+                                            <td style={{ color: 'var(--text-secondary)' }}>{book.author}</td>
+                                            <td>
+                                                <span className="badge bg-secondary rounded-pill px-3 py-2 border border-secondary" style={{ background: 'rgba(255,255,255,0.05) !important' }}>
+                                                    <i className="bi bi-person-circle me-1"></i> {book.userId?.username || 'Unknown'}
+                                                </span>
+                                            </td>
+                                            <td className="text-end" style={{ paddingRight: '1.5rem' }}>
+                                                <button className="btn btn-outline-danger btn-sm rounded-pill px-3" onClick={() => { setBookToRemove(book); setShowConfirmModal(true); }}>
+                                                    <i className="bi bi-trash3 me-1"></i> Remove
                                                 </button>
                                             </td>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" className="text-center py-5">
+                                            <div className="d-flex flex-column align-items-center">
+                                                <i className="bi bi-star text-muted mb-3" style={{ fontSize: '3rem' }}></i>
+                                                <h5 style={{ color: 'var(--text-primary)' }}>Your wishlist is empty</h5>
+                                                <p style={{ color: 'var(--text-muted)' }}>Save books you're interested in for later.</p>
+                                                <Link to="/browse" className="btn btn-outline-primary mt-2 px-4 rounded-pill">Explore Books</Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            ) : (
-                <div className="text-center p-5 bg-light rounded">
-                    <h4>Your wishlist is empty.</h4>
-                    <p className="text-muted">Add books you're interested in while browsing.</p>
-                    <Link to="/browse" className="btn btn-primary mt-3">Browse Books</Link>
-                </div>
-            )}
+            </div>
         </div>
     );
 }

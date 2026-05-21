@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
+import { UserPlus, User, Mail, Lock, Phone, MapPin, BookOpen } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({ username: '', email: '', password: '', phone: '', city: '', state: '' });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+      const res = await fetch('http://127.0.0.1:5000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -20,52 +24,75 @@ export default function Register() {
       toast.success('Registration successful! Please log in.');
       navigate('/login');
     } catch (err) { toast.error(err.message); }
+    finally { setLoading(false); }
   };
 
+  const Field = ({ id, name, type = 'text', placeholder, label, icon }) => (
+    <div className="form-group">
+      <label className="form-label" htmlFor={id}>
+        <span style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'middle' }}>{icon}</span>
+        {label}
+      </label>
+      <input
+        id={id} name={name} type={type}
+        placeholder={placeholder}
+        onChange={handleChange}
+        className="form-input" required
+      />
+    </div>
+  );
+
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-7 col-lg-5">
-        <div className="card card-ui p-2 p-md-4">
-          <div className="card-body">
-            <h2 className="card-title text-center mb-4">Create an Account</h2>
-            <form onSubmit={handleSubmit} className="d-grid gap-3">
-              <div className="form-floating">
-                <input id="username" name="username" type="text" placeholder="Username" onChange={handleChange} className="form-control" required />
-                <label htmlFor="username">Username</label>
-              </div>
-              <div className="form-floating">
-                <input id="email" name="email" type="email" placeholder="Email" onChange={handleChange} className="form-control" required />
-                <label htmlFor="email">Email address</label>
-              </div>
-              <div className="form-floating">
-                <input id="password" name="password" type="password" placeholder="Password" onChange={handleChange} className="form-control" required />
-                <label htmlFor="password">Password</label>
-              </div>
-              <div className="form-floating">
-                <input id="phone" name="phone" type="tel" placeholder="Phone Number" onChange={handleChange} className="form-control" required />
-                <label htmlFor="phone">Phone Number</label>
-              </div>
-              <div className="row g-2">
-                <div className="col-md">
-                  <div className="form-floating">
-                    <input id="city" name="city" type="text" placeholder="City" onChange={handleChange} className="form-control" required />
-                    <label htmlFor="city">City</label>
-                  </div>
-                </div>
-                <div className="col-md">
-                  <div className="form-floating">
-                    <input id="state" name="state" type="text" placeholder="State" onChange={handleChange} className="form-control" required />
-                    <label htmlFor="state">State</label>
-                  </div>
-                </div>
-              </div>
-              <button type="submit" className="btn btn-primary btn-lg w-100 mt-2">
-                Register
-              </button>
-            </form>
-          </div>
+    <div className="auth-page">
+      <motion.div
+        initial={{ opacity: 0, y: 32 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="auth-card register"
+      >
+        <div className="auth-icon" style={{
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.12))',
+          border: '1px solid rgba(99,102,241,0.3)'
+        }}>
+          <BookOpen size={22} color="#818cf8" />
         </div>
-      </div>
+
+        <h2 className="auth-title">Create Account</h2>
+        <p className="auth-subtitle">Join the BookExchange community</p>
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          <Field id="r-username" name="username" placeholder="johndoe"           label="Username"     icon={<User  size={11} />} />
+          <Field id="r-email"    name="email"    placeholder="you@example.com"   label="Email"        icon={<Mail  size={11} />} type="email" />
+          <Field id="r-password" name="password" placeholder="••••••••"          label="Password"     icon={<Lock  size={11} />} type="password" />
+          <Field id="r-phone"    name="phone"    placeholder="+91 99999 99999"   label="Phone Number" icon={<Phone size={11} />} type="tel" />
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="r-city">
+                <MapPin size={11} style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'middle' }} />City
+              </label>
+              <input id="r-city" name="city" type="text" placeholder="Mumbai" onChange={handleChange} className="form-input" required />
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="r-state">
+                <MapPin size={11} style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'middle' }} />State
+              </label>
+              <input id="r-state" name="state" type="text" placeholder="Maharashtra" onChange={handleChange} className="form-input" required />
+            </div>
+          </div>
+
+          <button type="submit" className="auth-submit" disabled={loading}
+            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', boxShadow: '0 0 24px rgba(99,102,241,0.4)' }}>
+            {loading
+              ? <><span className="spinner" /> Creating...</>
+              : <><UserPlus size={16} /> Create Account</>}
+          </button>
+
+          <p className="auth-footer-text">
+            Already have an account? <Link to="/login" style={{ color: '#818cf8' }}>Sign in</Link>
+          </p>
+        </form>
+      </motion.div>
     </div>
   );
 }

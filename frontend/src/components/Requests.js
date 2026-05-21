@@ -23,29 +23,35 @@ export default function Requests({ token }) {
     if (!token) { navigate('/login'); return; }
     const decoded = jwtDecode(token);
     setCurrentUserId(decoded.userId);
-    fetch('http://localhost:5000/api/requests', { headers: { Authorization: `Bearer ${token}` }})
-      .then(res => res.json()).then(setRequests).catch(console.error);
+    fetch('http://127.0.0.1:5000/api/requests', { headers: { Authorization: `Bearer ${token}` }})
+      .then(res => res.json())
+      .then(data => setRequests(Array.isArray(data) ? data : []))
+      .catch((err) => {
+          console.error(err);
+          setRequests([]);
+      });
   }, [token, navigate]);
 
   const handleStatusUpdate = async (id, status) => {
-    await fetch(`http://localhost:5000/api/requests/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }),});
-    setRequests(requests.map(req => req._id === id ? { ...req, status } : req));
-    toast.success(`Request has been ${status}.`);
+    try {
+      await fetch(`http://127.0.0.1:5000/api/requests/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }) });
+      setRequests(requests.map(req => req._id === id ? { ...req, status } : req));
+      toast.success(`Request has been ${status}.`);
+    } catch(err) { toast.error("Failed to update status."); }
   };
   
   const viewContact = async (id) => {
     try {
-        const res = await fetch(`http://localhost:5000/api/requests/${id}/contact`, { headers: { Authorization: `Bearer ${token}` }});
+         const res = await fetch(`http://127.0.0.1:5000/api/requests/${id}/contact`, { headers: { Authorization: `Bearer ${token}` }});
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         setContactInfo(data);
     } catch(err) { toast.error(err.message); }
   };
 
-  // --- THIS IS THE MISSING FUNCTION ---
   const handleMarkAsSent = async (requestId) => {
     try {
-      await fetch(`http://localhost:5000/api/requests/${requestId}/sent`, {
+      await fetch(`http://127.0.0.1:5000/api/requests/${requestId}/sent`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -67,7 +73,7 @@ export default function Requests({ token }) {
   const handleConfirmDelivery = async () => {
     if (!requestToDeliver) return;
     try {
-      await fetch(`http://localhost:5000/api/requests/${requestToDeliver._id}/receive`, {
+      await fetch(`http://127.0.0.1:5000/api/requests/${requestToDeliver._id}/receive`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -90,7 +96,7 @@ export default function Requests({ token }) {
     const userToRateId = currentUserId === requestToRate.ownerId._id ? requestToRate.requesterId._id : requestToRate.ownerId._id;
     const isOwnerRating = currentUserId === requestToRate.ownerId._id;
     try {
-        await fetch(`http://localhost:5000/api/user/rate/${userToRateId}`, {
+        await fetch(`http://127.0.0.1:5000/api/user/rate/${userToRateId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ rating, comment, requestId: requestToRate._id })
@@ -111,86 +117,105 @@ export default function Requests({ token }) {
   const infoToShow = contactInfo && contactInfo.owner ? (currentUserId === contactInfo.owner._id ? contactInfo.requester : contactInfo.owner) : null;
   const incoming = requests.filter(req => req.ownerId._id === currentUserId);
   const outgoing = requests.filter(req => req.requesterId._id === currentUserId);
-  const hasUserRated = (req) => {
-      const isOwner = req.ownerId._id === currentUserId;
-      return isOwner ? req.isRatedByOwner : req.isRatedByRequester;
-  };
+  const hasUserRated = (req) => req.ownerId._id === currentUserId ? req.isRatedByOwner : req.isRatedByRequester;
 
   return (
-    <div className="container py-2">
+    <div className="container py-4 animate-fadeInUp">
       {chatRequest && <ChatModal token={token} request={chatRequest} onClose={handleCloseChat} currentUserId={currentUserId} />}
-      <ConfirmationModal show={showDeliverConfirmModal} onClose={handleCloseDeliverModal} onConfirm={handleConfirmDelivery} title="Confirm Receipt" confirmText="Yes, I've Received It" confirmButtonClass="btn-success">
-        <p>Please confirm that you have received the book titled: <strong>"{requestToDeliver?.bookId?.title}"</strong>?</p>
-        <p className="text-muted">This will complete the transaction.</p>
+      <ConfirmationModal show={showDeliverConfirmModal} onClose={handleCloseDeliverModal} onConfirm={handleConfirmDelivery} title="Confirm Receipt" confirmText="Yes, Received" confirmButtonClass="btn-success">
+        <p>Please confirm that you have received <strong style={{color:'var(--text-primary)'}}>"{requestToDeliver?.bookId?.title}"</strong>?</p>
+        <p className="text-muted mb-0">This will complete the transaction.</p>
       </ConfirmationModal>
-      <RatingModal 
-        show={showRatingModal}
-        onClose={() => setShowRatingModal(false)}
-        onSubmit={handleRatingSubmit}
-        title={`Rate your exchange for "${requestToRate?.bookId?.title}"`}
-      />
+      <RatingModal show={showRatingModal} onClose={() => setShowRatingModal(false)} onSubmit={handleRatingSubmit} title={`Rate your exchange`} />
 
-      <h2 className="mb-4">My Requests</h2>
+      <h2 className="mb-4 section-heading"><i className="bi bi-arrow-left-right me-2" style={{color: 'var(--accent-blue)'}}></i>My Requests</h2>
+
       {infoToShow && (
-        <div className="card bg-light mb-4 border-secondary">
-          <div className="card-header d-flex justify-content-between align-items-center">
-            <strong>Contact Information</strong>
+        <div className="card card-ui mb-4 animate-scaleIn border-info" style={{ background: 'rgba(34,211,238,0.05)' }}>
+          <div className="card-header border-bottom border-info d-flex justify-content-between align-items-center bg-transparent py-3">
+            <h5 className="mb-0 text-info"><i className="bi bi-person-lines-fill me-2"></i>Contact Information</h5>
             <button type="button" className="btn-close" aria-label="Close" onClick={() => setContactInfo(null)}></button>
           </div>
           <div className="card-body">
-            <p><strong>Username:</strong> {infoToShow.username}</p>
-            <p><strong>Email:</strong> {infoToShow.email}</p>
-            <p className="mb-0"><strong>Phone:</strong> {infoToShow.phone}</p>
+            <div className="row g-3">
+              <div className="col-md-4"><div className="text-muted small">Username</div><div className="fw-bold">{infoToShow.username}</div></div>
+              <div className="col-md-4"><div className="text-muted small">Email</div><div className="fw-bold">{infoToShow.email}</div></div>
+              <div className="col-md-4"><div className="text-muted small">Phone</div><div className="fw-bold">{infoToShow.phone}</div></div>
+            </div>
           </div>
         </div>
       )}
       
-      <div className="card card-ui">
-        <div className="card-header bg-white py-3"><h4 className="mb-0">Incoming Requests</h4></div>
-        <div className="card-body"><div className="table-responsive">
-          <table className="table table-hover align-middle">
-            <thead><tr><th>Book Title</th><th>Requester</th><th>Status</th><th className="text-end">Actions</th></tr></thead>
-            <tbody>{incoming.map(req => (<tr key={req._id}>
-                <td>{req.bookId.title}</td><td>{req.requesterId.username}</td>
-                <td>
-                  <span className={`badge rounded-pill text-bg-${req.status === 'accepted' ? 'success' : 'warning'}`}>{req.status}</span>
-                  {req.deliveryStatus === 'sent' && <span className="badge rounded-pill text-bg-info ms-2">Sent</span>}
-                  {req.deliveryStatus === 'received' && <span className="badge rounded-pill text-bg-dark ms-2">Completed</span>}
-                </td>
-                <td className="text-end"><div className="d-flex justify-content-end gap-2">
-                    {req.status === 'pending' && (<><button onClick={() => handleStatusUpdate(req._id, 'accepted')} className="btn btn-success btn-sm">Accept</button><button onClick={() => handleStatusUpdate(req._id, 'rejected')} className="btn btn-danger btn-sm">Reject</button></>)}
-                    {req.status === 'accepted' && req.deliveryStatus === 'pending' && (
-                        <button onClick={() => handleMarkAsSent(req._id)} className="btn btn-warning btn-sm">Mark as Sent</button>
-                    )}
-                    {req.status === 'accepted' && req.deliveryStatus === 'sent' && (<span className="text-muted fst-italic">Waiting for receiver...</span>)}
-                    {req.status === 'accepted' && (<><button onClick={() => viewContact(req._id)} className="btn btn-secondary btn-sm">Contact</button><button onClick={() => setChatRequest(req)} className="btn btn-primary btn-sm">Chat</button></>)}
-                    {req.deliveryStatus === 'received' && !hasUserRated(req) && (<button onClick={() => handleRateClick(req)} className="btn btn-info btn-sm">Rate Requester</button>)}
-                    {req.deliveryStatus === 'received' && hasUserRated(req) && (<span className="text-muted fst-italic ms-2"><i className="bi bi-check-circle-fill text-success"></i> Rated</span>)}
-                </div></td>
-            </tr>))}</tbody>
+      <div className="card card-ui mb-5 border-0">
+        <div className="card-header bg-transparent border-bottom-0 pt-4 pb-3">
+            <h4 className="mb-0 d-flex align-items-center">
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(168,85,247,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
+                    <i className="bi bi-box-arrow-in-down-right" style={{ color: 'var(--accent-purple)' }}></i>
+                </div>
+                Incoming Requests
+            </h4>
+        </div>
+        <div className="card-body p-0"><div className="table-responsive">
+          <table className="table table-hover align-middle mb-0">
+            <thead style={{ background: 'rgba(255,255,255,0.02)' }}><tr><th style={{paddingLeft:'1.5rem'}}>Book Title</th><th>Requester</th><th>Status</th><th className="text-end" style={{paddingRight:'1.5rem'}}>Actions</th></tr></thead>
+            <tbody>
+              {incoming.length > 0 ? incoming.map(req => (
+                <tr key={req._id}>
+                  <td style={{paddingLeft:'1.5rem', color:'var(--text-primary)'}} className="fw-bold">{req.bookId.title}</td>
+                  <td style={{color:'var(--text-secondary)'}}>{req.requesterId.username}</td>
+                  <td>
+                    <span className={`badge bg-${req.status === 'accepted' ? 'success' : req.status === 'rejected' ? 'danger' : 'warning'}`}>{req.status}</span>
+                    {req.deliveryStatus === 'sent' && <span className="badge bg-info ms-2">Sent</span>}
+                    {req.deliveryStatus === 'received' && <span className="badge bg-secondary ms-2 border border-secondary">Completed</span>}
+                  </td>
+                  <td className="text-end" style={{paddingRight:'1.5rem'}}><div className="d-flex justify-content-end gap-2">
+                      {req.status === 'pending' && (<><button onClick={() => handleStatusUpdate(req._id, 'accepted')} className="btn btn-success btn-sm rounded-pill px-3"><i className="bi bi-check-lg me-1"></i>Accept</button><button onClick={() => handleStatusUpdate(req._id, 'rejected')} className="btn btn-outline-danger btn-sm rounded-pill px-3"><i className="bi bi-x-lg me-1"></i>Reject</button></>)}
+                      {req.status === 'accepted' && req.deliveryStatus === 'pending' && (
+                          <button onClick={() => handleMarkAsSent(req._id)} className="btn btn-outline-warning btn-sm rounded-pill px-3"><i className="bi bi-box-seam me-1"></i>Mark as Sent</button>
+                      )}
+                      {req.status === 'accepted' && req.deliveryStatus === 'sent' && (<span className="text-muted small fst-italic py-1 px-2 rounded" style={{background:'rgba(255,255,255,0.05)'}}>Waiting for receiver...</span>)}
+                      {req.status === 'accepted' && (<><button onClick={() => viewContact(req._id)} className="btn btn-outline-info btn-sm rounded-pill px-3" title="View Contact"><i className="bi bi-person-lines-fill"></i></button><button onClick={() => setChatRequest(req)} className="btn btn-primary btn-sm rounded-pill px-3" title="Chat"><i className="bi bi-chat-dots"></i></button></>)}
+                      {req.deliveryStatus === 'received' && !hasUserRated(req) && (<button onClick={() => handleRateClick(req)} className="btn btn-outline-warning btn-sm rounded-pill px-3"><i className="bi bi-star-fill me-1"></i>Rate</button>)}
+                      {req.deliveryStatus === 'received' && hasUserRated(req) && (<span className="text-success small fst-italic py-1 px-2 rounded" style={{background:'rgba(16,185,129,0.1)'}}><i className="bi bi-check-circle-fill me-1"></i>Rated</span>)}
+                  </div></td>
+                </tr>
+              )) : <tr><td colSpan="4" className="text-center py-4 text-muted">No incoming requests.</td></tr>}
+            </tbody>
           </table>
         </div></div>
       </div>
 
-      <div className="card card-ui mt-5">
-        <div className="card-header bg-white py-3"><h4 className="mb-0">Outgoing Requests</h4></div>
-        <div className="card-body"><div className="table-responsive">
-          <table className="table table-hover align-middle">
-          <thead><tr><th>Book Title</th><th>Owner</th><th>Status</th><th className="text-end">Actions</th></tr></thead>
-            <tbody>{outgoing.map(req => (<tr key={req._id}>
-                <td>{req.bookId.title}</td><td>{req.ownerId.username}</td>
-                <td>
-                  <span className={`badge rounded-pill text-bg-${req.status === 'accepted' ? 'success' : 'warning'}`}>{req.status}</span>
-                  {req.deliveryStatus === 'sent' && <span className="badge rounded-pill text-bg-info ms-2">Shipped</span>}
-                  {req.deliveryStatus === 'received' && <span className="badge rounded-pill text-bg-dark ms-2">Completed</span>}
-                </td>
-                <td className="text-end"><div className="d-flex justify-content-end gap-2">
-                    {req.status === 'accepted' && req.deliveryStatus === 'sent' && (<button onClick={() => handleDeliverClick(req)} className="btn btn-success btn-sm">Confirm Receipt</button>)}
-                    {req.status === 'accepted' && (<><button onClick={() => viewContact(req._id)} className="btn btn-secondary btn-sm">Contact</button><button onClick={() => setChatRequest(req)} className="btn btn-primary btn-sm">Chat</button></>)}
-                    {req.deliveryStatus === 'received' && !hasUserRated(req) && (<button onClick={() => handleRateClick(req)} className="btn btn-info btn-sm">Rate Owner</button>)}
-                    {req.deliveryStatus === 'received' && hasUserRated(req) && (<span className="text-muted fst-italic ms-2"><i className="bi bi-check-circle-fill text-success"></i> Rated</span>)}
-                </div></td>
-            </tr>))}</tbody>
+      <div className="card card-ui border-0">
+        <div className="card-header bg-transparent border-bottom-0 pt-4 pb-3">
+            <h4 className="mb-0 d-flex align-items-center">
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(34,211,238,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
+                    <i className="bi bi-box-arrow-up-right" style={{ color: 'var(--accent-cyan)' }}></i>
+                </div>
+                Outgoing Requests
+            </h4>
+        </div>
+        <div className="card-body p-0"><div className="table-responsive">
+          <table className="table table-hover align-middle mb-0">
+          <thead style={{ background: 'rgba(255,255,255,0.02)' }}><tr><th style={{paddingLeft:'1.5rem'}}>Book Title</th><th>Owner</th><th>Status</th><th className="text-end" style={{paddingRight:'1.5rem'}}>Actions</th></tr></thead>
+            <tbody>
+              {outgoing.length > 0 ? outgoing.map(req => (
+                <tr key={req._id}>
+                  <td style={{paddingLeft:'1.5rem', color:'var(--text-primary)'}} className="fw-bold">{req.bookId.title}</td>
+                  <td style={{color:'var(--text-secondary)'}}>{req.ownerId.username}</td>
+                  <td>
+                    <span className={`badge bg-${req.status === 'accepted' ? 'success' : req.status === 'rejected' ? 'danger' : 'warning'}`}>{req.status}</span>
+                    {req.deliveryStatus === 'sent' && <span className="badge bg-info ms-2">Shipped</span>}
+                    {req.deliveryStatus === 'received' && <span className="badge bg-secondary ms-2 border border-secondary">Completed</span>}
+                  </td>
+                  <td className="text-end" style={{paddingRight:'1.5rem'}}><div className="d-flex justify-content-end gap-2">
+                      {req.status === 'accepted' && req.deliveryStatus === 'sent' && (<button onClick={() => handleDeliverClick(req)} className="btn btn-success btn-sm rounded-pill px-3"><i className="bi bi-check2-circle me-1"></i>Confirm Receipt</button>)}
+                      {req.status === 'accepted' && (<><button onClick={() => viewContact(req._id)} className="btn btn-outline-info btn-sm rounded-pill px-3" title="View Contact"><i className="bi bi-person-lines-fill"></i></button><button onClick={() => setChatRequest(req)} className="btn btn-primary btn-sm rounded-pill px-3" title="Chat"><i className="bi bi-chat-dots"></i></button></>)}
+                      {req.deliveryStatus === 'received' && !hasUserRated(req) && (<button onClick={() => handleRateClick(req)} className="btn btn-outline-warning btn-sm rounded-pill px-3"><i className="bi bi-star-fill me-1"></i>Rate</button>)}
+                      {req.deliveryStatus === 'received' && hasUserRated(req) && (<span className="text-success small fst-italic py-1 px-2 rounded" style={{background:'rgba(16,185,129,0.1)'}}><i className="bi bi-check-circle-fill me-1"></i>Rated</span>)}
+                  </div></td>
+                </tr>
+              )) : <tr><td colSpan="4" className="text-center py-4 text-muted">No outgoing requests.</td></tr>}
+            </tbody>
           </table>
         </div></div>
       </div>

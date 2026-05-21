@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
     methods: ["GET", "POST"]
   }
 });
@@ -22,10 +22,17 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-const db = 'mongodb://localhost:27017/bookExchangeDB';
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB Connected...'))
-  .catch(err => console.log(err));
+const db = 'mongodb://127.0.0.1:27017/bookExchangeDB'; // Using 127.0.0.1 instead of localhost for better IPv4 resolution
+mongoose.connect(db)
+  .then(() => console.log('MongoDB Connected successfully!'))
+  .catch(err => {
+    console.error('===================================================');
+    console.error('MongoDB Connection Error:');
+    console.error('It looks like your local MongoDB server is not running.');
+    console.error('Please make sure to start the MongoDB service on your Windows machine.');
+    console.error('Error details:', err.message);
+    console.error('===================================================');
+  });
 
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/books', require('./routes/bookRoutes'));

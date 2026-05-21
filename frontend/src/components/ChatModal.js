@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import io from 'socket.io-client';
 import './ChatModal.css';
 
-const SOCKET_URL = 'http://localhost:5000';
+const SOCKET_URL = 'http://127.0.0.1:5000';
 
 export default function ChatModal({ token, request, onClose, currentUserId }) {
   const [messages, setMessages] = useState([]);
@@ -35,7 +35,7 @@ export default function ChatModal({ token, request, onClose, currentUserId }) {
 
     const setupChat = async () => {
       try {
-        const convRes = await fetch(`http://localhost:5000/api/messages/request/${request._id}`, {
+        const convRes = await fetch(`http://127.0.0.1:5000/api/messages/request/${request._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!convRes.ok) throw new Error('Could not fetch conversation.');
@@ -45,7 +45,7 @@ export default function ChatModal({ token, request, onClose, currentUserId }) {
         setConversationId(conversation._id);
         socketRef.current.emit('joinRoom', conversation._id);
         
-        const messagesRes = await fetch(`http://localhost:5000/api/messages/conversation/${conversation._id}`, {
+        const messagesRes = await fetch(`http://127.0.0.1:5000/api/messages/conversation/${conversation._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!messagesRes.ok) throw new Error('Could not fetch messages.');

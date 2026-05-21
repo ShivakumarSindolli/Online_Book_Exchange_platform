@@ -1,108 +1,192 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
+import { BookOpen, User, MapPin, Tag, Image, CloudUpload, Loader2 } from 'lucide-react';
 
 export default function AddBook({ token }) {
   const [form, setForm] = useState({ title: '', author: '', condition: 'Good', type: 'lend', price: '', city: '', state: '' });
   const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => { if (!token) navigate('/login'); }, [token, navigate]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleImageChange = (e) => setImage(e.target.files[0]);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+    if (file) setPreview(URL.createObjectURL(file));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const formData = new FormData();
-    // Append all form fields to FormData
-    for (const key in form) {
-      formData.append(key, form[key]);
-    }
-    if (image) {
-      formData.append('image', image);
-    }
-
+    for (const key in form) formData.append(key, form[key]);
+    if (image) formData.append('image', image);
     try {
-        const res = await fetch('http://localhost:5000/api/books', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-        toast.success('Book added successfully!');
-        navigate('/browse');
+      const res = await fetch('http://127.0.0.1:5000/api/books', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      toast.success('Book added successfully!');
+      navigate('/browse');
     } catch (err) { toast.error(`Error: ${err.message}`); }
+    finally { setLoading(false); }
+  };
+
+  const inputStyle = {
+    width: '100%',
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    color: '#f8fafc',
+    borderRadius: '10px',
+    padding: '0.65rem 0.9rem',
+    fontSize: '0.9rem',
+    fontFamily: "'Inter', sans-serif",
+    outline: 'none',
+    transition: 'all 0.15s ease',
+  };
+  const labelStyle = {
+    fontSize: '0.73rem', fontWeight: 700,
+    textTransform: 'uppercase', letterSpacing: '0.08em',
+    color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem',
+    marginBottom: '0.4rem',
   };
 
   return (
-    <div className="row justify-content-center">
-      <div className="col-md-8 col-lg-7">
-        <div className="card card-ui p-2 p-md-4">
-          <div className="card-body">
-            <h2 className="card-title text-center mb-4">Add a New Book</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="form-floating mb-3">
-                <input id="title" name="title" type="text" placeholder="Title" onChange={handleChange} className="form-control" required />
-                <label htmlFor="title">Title</label>
-              </div>
-              <div className="form-floating mb-3">
-                <input id="author" name="author" type="text" placeholder="Author" onChange={handleChange} className="form-control" required />
-                <label htmlFor="author">Author</label>
-              </div>
-
-              <div className="row g-2 mb-3">
-                <div className="col-md">
-                  <div className="form-floating">
-                    <input id="city" name="city" type="text" placeholder="City" onChange={handleChange} className="form-control" required />
-                    <label htmlFor="city">City</label>
-                  </div>
-                </div>
-                <div className="col-md">
-                  <div className="form-floating">
-                    <input id="state" name="state" type="text" placeholder="State" onChange={handleChange} className="form-control" required />
-                    <label htmlFor="state">State</label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="row g-2 mb-3">
-                <div className="col-md">
-                  <div className="form-floating">
-                    <select id="condition" name="condition" value={form.condition} onChange={handleChange} className="form-select" required>
-                      <option>New</option><option>Like New</option><option>Good</option><option>Fair</option><option>Used</option>
-                    </select>
-                    <label htmlFor="condition">Condition</label>
-                  </div>
-                </div>
-                <div className="col-md">
-                  <div className="form-floating">
-                    <select id="type" name="type" value={form.type} onChange={handleChange} className="form-select" required>
-                      <option value="lend">Lend</option><option value="sell">Sell</option>
-                    </select>
-                    <label htmlFor="type">Type</label>
-                  </div>
-                </div>
-              </div>
-
-              {form.type === 'sell' && (
-                <div className="form-floating mb-3">
-                  <input id="price" name="price" type="number" placeholder="Price ($)" value={form.price} onChange={handleChange} className="form-control" required />
-                  <label htmlFor="price">Price ($)</label>
-                </div>
-              )}
-              
-              <div className="mb-3">
-                <label htmlFor="image" className="form-label">Book Cover Image</label>
-                <input type="file" className="form-control" id="image" name="image" onChange={handleImageChange} accept="image/*" required/>
-              </div>
-
-              <button type="submit" className="btn btn-primary btn-lg w-100 mt-3">Add Book</button>
-            </form>
+    <div className="auth-page" style={{ alignItems: 'flex-start', paddingTop: '6rem', paddingBottom: '3rem' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          width: '100%', maxWidth: '560px',
+          background: 'rgba(12,7,28,0.90)',
+          border: '1px solid rgba(99,102,241,0.2)',
+          borderRadius: '20px',
+          padding: '2.5rem 2.25rem',
+          boxShadow: '0 0 60px rgba(99,102,241,0.15), 0 24px 64px rgba(0,0,0,0.6)',
+          backdropFilter: 'blur(30px)',
+        }}
+      >
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{
+            width: '52px', height: '52px', borderRadius: '14px',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.12))',
+            border: '1px solid rgba(99,102,241,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 1.1rem',
+          }}>
+            <BookOpen size={22} color="#818cf8" />
           </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.3rem' }}>Add a New Book</h2>
+          <p style={{ color: '#64748b', fontSize: '0.88rem' }}>Share your book with the community</p>
         </div>
-      </div>
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* Title */}
+          <div>
+            <label style={labelStyle}><BookOpen size={11} /> Title</label>
+            <input name="title" type="text" placeholder="Book title" onChange={handleChange} style={inputStyle} required
+              onFocus={e => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.15)'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }} />
+          </div>
+
+          {/* Author */}
+          <div>
+            <label style={labelStyle}><User size={11} /> Author</label>
+            <input name="author" type="text" placeholder="Author name" onChange={handleChange} style={inputStyle} required
+              onFocus={e => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.15)'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }} />
+          </div>
+
+          {/* City & State */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div>
+              <label style={labelStyle}><MapPin size={11} /> City</label>
+              <input name="city" type="text" placeholder="Mumbai" onChange={handleChange} style={inputStyle} required
+                onFocus={e => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.15)'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }} />
+            </div>
+            <div>
+              <label style={labelStyle}><MapPin size={11} /> State</label>
+              <input name="state" type="text" placeholder="Maharashtra" onChange={handleChange} style={inputStyle} required
+                onFocus={e => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.15)'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }} />
+            </div>
+          </div>
+
+          {/* Condition & Type */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div>
+              <label style={labelStyle}><Tag size={11} /> Condition</label>
+              <select name="condition" value={form.condition} onChange={handleChange} style={{ ...inputStyle, cursor: 'pointer' }} required>
+                {['New','Like New','Good','Fair','Used'].map(c => <option key={c} style={{ background: '#0c071c' }}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}><Tag size={11} /> Type</label>
+              <select name="type" value={form.type} onChange={handleChange} style={{ ...inputStyle, cursor: 'pointer' }} required>
+                <option value="lend" style={{ background: '#0c071c' }}>Lend</option>
+                <option value="sell" style={{ background: '#0c071c' }}>Sell</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Price (if sell) */}
+          {form.type === 'sell' && (
+            <div>
+              <label style={labelStyle}><Tag size={11} /> Price (₹)</label>
+              <input name="price" type="number" placeholder="Enter price" value={form.price} onChange={handleChange} style={inputStyle} required
+                onFocus={e => { e.target.style.borderColor = '#6366f1'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.15)'; }}
+                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; }} />
+            </div>
+          )}
+
+          {/* Image upload */}
+          <div>
+            <label style={labelStyle}><Image size={11} /> Book Cover Photo</label>
+            <label htmlFor="book-image" style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
+              border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '12px',
+              padding: '1.5rem', cursor: 'pointer', color: '#64748b',
+              transition: 'all 0.2s ease', fontSize: '0.88rem',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)'; e.currentTarget.style.background = 'rgba(99,102,241,0.04)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'transparent'; }}
+            >
+              {preview ? (
+                <img src={preview} alt="Preview" style={{ maxHeight: '160px', borderRadius: '8px', objectFit: 'cover' }} />
+              ) : (
+                <><Image size={28} style={{ opacity: 0.4 }} /><span>Click to upload cover image</span></>
+              )}
+            </label>
+            <input id="book-image" type="file" name="image" onChange={handleImageChange} accept="image/*" required style={{ display: 'none' }} />
+          </div>
+
+          {/* Submit */}
+          <button type="submit" disabled={loading} style={{
+            marginTop: '0.5rem',
+            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+            color: '#fff', border: 'none', borderRadius: '10px',
+            padding: '0.8rem', fontWeight: 700, fontSize: '0.95rem',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+            boxShadow: '0 0 24px rgba(99,102,241,0.4)',
+            transition: 'all 0.25s ease',
+            opacity: loading ? 0.7 : 1,
+          }}>
+            {loading ? <><Loader2 size={17} style={{ animation: 'spin 0.7s linear infinite' }} /> Uploading...</> : <><CloudUpload size={17} /> Add Book</>}
+          </button>
+        </form>
+      </motion.div>
     </div>
   );
 }

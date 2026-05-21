@@ -2,15 +2,17 @@ const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
 const auth = require('../middleware/authMiddleware');
-const { uploadToCloudinary } = require('../config/cloudinary');
+const { upload } = require('../config/upload');
 
-// ... POST and DELETE routes remain the same ...
-router.post('/', auth, uploadToCloudinary, async (req, res) => {
+// POST route to add a new book with a local image upload
+router.post('/', auth, upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'Book cover image is required.' });
   const { title, author, condition, type, price, city, state } = req.body;
   if (type === 'sell' && (!price || price <= 0)) return res.status(400).json({ message: 'Price is required for selling a book.' });
   try {
-    const newBookData = { title, author, condition, type, price: type === 'sell' ? price : 0, city, state, userId: req.userId, imageUrl: req.file.path };
+    // Store the image path as '/uploads/filename' so the frontend can use it directly
+    const imageUrl = `/uploads/${req.file.filename}`;
+    const newBookData = { title, author, condition, type, price: type === 'sell' ? price : 0, city, state, userId: req.userId, imageUrl };
     const newBook = new Book(newBookData);
     const book = await newBook.save();
     res.status(201).json(book);

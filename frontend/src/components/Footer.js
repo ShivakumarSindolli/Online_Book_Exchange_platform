@@ -1,61 +1,86 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
+import { BookOpen, Share2, Send, Heart } from 'lucide-react';
 
 const Footer = () => {
-    const projectName = "BookExchange"; 
-    const currentYear = new Date().getFullYear();
-
-    return (
-        <footer className="app-footer mt-auto">
-            <div className="container py-5">
-                <div className="row">
-                    <div className="col-lg-4 col-md-12 mb-4 mb-lg-0">
-                        <h4 className="text-white">{projectName}</h4>
-                        <p className="text-white-50">Connecting communities, one book at a time.</p>
-                        <div className="footer-socials mt-3">
-                            <a href="#!" title="Facebook" className="text-white me-3"><i className="bi bi-facebook"></i></a>
-                            <a href="#!" title="Twitter" className="text-white me-3"><i className="bi bi-twitter"></i></a>
-                            <a href="#!" title="Instagram" className="text-white"><i className="bi bi-instagram"></i></a>
-                        </div>
-                    </div>
-
-                    <div className="col-lg-2 col-md-6 mb-4 mb-lg-0">
-                        <h5>Navigate</h5>
-                        <ul className="list-unstyled footer-links">
-                            <li><Link to="/browse">Browse Books</Link></li>
-                            <li><Link to="/about">About Us</Link></li>
-                            <li><Link to="/login">Login</Link></li>
-                            <li><Link to="/register">Register</Link></li>
-                        </ul>
-                    </div>
-
-                    <div className="col-lg-2 col-md-6 mb-4 mb-lg-0">
-                        <h5>Get Started</h5>
-                        <ul className="list-unstyled footer-links">
-                            <li><Link to="/add-book">Add a Book</Link></li>
-                            <li><Link to="/requests">My Requests</Link></li>
-                            <li><Link to="/wishlist">My Wishlist</Link></li>
-                            <li><Link to="/profile">My Profile</Link></li>
-                        </ul>
-                    </div>
-
-                    <div className="col-lg-4 col-md-12 mb-4 mb-lg-0">
-                        <h5>Stay Updated</h5>
-                        <p className="text-white-50">Join our newsletter for the latest updates.</p>
-                        <form>
-                            <div className="input-group">
-                                <input type="email" className="form-control" placeholder="your-email@example.com" />
-                                <button className="btn btn-secondary" type="button">Subscribe</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+  const year = new Date().getFullYear();
+  return (
+    <footer className="site-footer">
+      <div className="container">
+        <div className="footer-grid">
+          {/* Brand */}
+          <div>
+            <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem', textDecoration: 'none', fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-1)', letterSpacing: '-0.03em', marginBottom: '0.75rem' }}>
+              <div style={{ width: '30px', height: '30px', background: 'linear-gradient(135deg,#a855f7,#6366f1)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BookOpen size={15} color="#fff" />
+              </div>
+              BookExchange
+            </Link>
+            <p className="footer-brand-desc">
+              Connecting communities through books. Share stories, build friendships, and discover your next great read — all for free.
+            </p>
+            <div className="footer-socials">
+              {[
+                { icon: <Share2 size={15} />, href: '#' },
+                { icon: <Share2 size={15} />, href: '#' },
+                { icon: <Share2 size={15} />, href: '#' },
+              ].map((s, i) => (
+                <a key={i} href={s.href} className="footer-social-btn">{s.icon}</a>
+              ))}
             </div>
-            <div className="footer-bottom text-center py-3">
-                <p className="mb-0 text-white-50">© {currentYear} {projectName}. All Rights Reserved.</p>
+          </div>
+
+          {/* Navigate */}
+          <div>
+            <h6 className="footer-col-title">Navigate</h6>
+            <ul className="footer-links">
+              {[
+                { to: '/browse',   label: 'Browse Books' },
+                { to: '/login',    label: 'Sign In' },
+                { to: '/register', label: 'Register' },
+              ].map(l => (
+                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Get Started */}
+          <div>
+            <h6 className="footer-col-title">Account</h6>
+            <ul className="footer-links">
+              {[
+                { to: '/add-book', label: 'Add a Book' },
+                { to: '/requests', label: 'My Requests' },
+                { to: '/wishlist', label: 'My Wishlist' },
+                { to: '/profile',  label: 'My Profile' },
+              ].map(l => (
+                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h6 className="footer-col-title">Stay Updated</h6>
+            <p style={{ fontSize: '0.87rem', color: 'var(--text-3)', marginBottom: '1rem', lineHeight: 1.6 }}>
+              Get notified when books you want become available near you.
+            </p>
+            <div className="footer-newsletter-input">
+              <input type="email" placeholder="your@email.com" />
+              <button className="btn btn-primary btn-sm" style={{ padding: '0.6rem 0.85rem' }}>
+                <Send size={14} />
+              </button>
             </div>
-        </footer>
-    );
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="footer-bottom">
+          <p className="footer-copy">© {year} BookExchange. Made with <Heart size={11} style={{ display: 'inline', color: '#f472b6', verticalAlign: 'middle', marginBottom: '1px' }} /> for book lovers.</p>
+          <p className="footer-copy">Community · Open · Free</p>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

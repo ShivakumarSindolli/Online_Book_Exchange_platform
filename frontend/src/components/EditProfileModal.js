@@ -1,5 +1,3 @@
-// frontend/src/components/EditProfileModal.js
-
 import React, { useState, useEffect } from 'react';
 
 export default function EditProfileModal({ show, onClose, currentUser, onUpdate }) {
@@ -7,7 +5,6 @@ export default function EditProfileModal({ show, onClose, currentUser, onUpdate 
         username: '', phone: '', city: '', state: ''
     });
 
-    // When the modal is shown, pre-fill the form with the user's current data
     useEffect(() => {
         if (currentUser) {
             setFormData({
@@ -19,24 +16,24 @@ export default function EditProfileModal({ show, onClose, currentUser, onUpdate 
         }
     }, [currentUser]);
 
-    if (!show) {
-        return null;
-    }
+    if (!show) return null;
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
+    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
     const handleSubmit = (e) => {
         e.preventDefault();
-        onUpdate(formData); // Call the update function passed from the parent
+        onUpdate(formData);
     };
 
     return (
         <div className="modal-overlay">
             <div className="modal-content card card-ui" style={{ maxWidth: '600px' }}>
-                <div className="modal-header card-header">
-                    <h5 className="modal-title card-title mb-0">Edit Your Profile</h5>
+                <div className="modal-header card-header border-bottom">
+                    <h5 className="modal-title card-title mb-0 d-flex align-items-center">
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
+                            <i className="bi bi-person-gear" style={{ color: 'var(--accent-blue)', fontSize: '1.2rem' }}></i>
+                        </div>
+                        Edit Your Profile
+                    </h5>
                     <button type="button" className="btn-close" onClick={onClose}></button>
                 </div>
                 <form onSubmit={handleSubmit}>
@@ -64,9 +61,9 @@ export default function EditProfileModal({ show, onClose, currentUser, onUpdate 
                             </div>
                         </div>
                     </div>
-                    <div className="modal-footer card-footer d-flex justify-content-end gap-2">
-                        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="btn btn-primary">Save Changes</button>
+                    <div className="modal-footer card-footer d-flex justify-content-end gap-2 border-top">
+                        <button type="button" className="btn btn-secondary px-4 rounded-pill" onClick={onClose}>Cancel</button>
+                        <button type="submit" className="btn btn-primary px-4 rounded-pill">Save Changes</button>
                     </div>
                 </form>
             </div>
