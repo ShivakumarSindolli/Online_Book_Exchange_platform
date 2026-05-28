@@ -96,7 +96,7 @@ export default function BrowseBooks({ token }) {
     <div className="page-wrapper" style={{ paddingTop: 0, paddingBottom: '4rem' }}>
       {/* Page header */}
       <div style={{
-        background: 'linear-gradient(180deg, rgba(99,102,241,0.06) 0%, transparent 100%)',
+        background: 'linear-gradient(180deg, var(--bg-elevated) 0%, transparent 100%)',
         borderBottom: '1px solid var(--border)',
         padding: '2rem 1.5rem 2rem',
         textAlign: 'center',

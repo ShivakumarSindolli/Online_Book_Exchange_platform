@@ -6,6 +6,7 @@ import {
   BookOpen, Search, PlusCircle, ArrowLeftRight, User, Star,
   ChevronDown, LogOut, Menu, X, Library
 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar({ token, logout }) {
   const [username, setUsername] = useState(null);
@@ -65,6 +66,7 @@ export default function Navbar({ token, logout }) {
 
         {/* Desktop actions */}
         <div className="navbar-actions navbar-desktop" style={{ display: 'flex' }}>
+          <ThemeToggle size="md" />
           {token && username ? (
             <div style={{ position: 'relative' }}>
               <button
@@ -88,7 +90,7 @@ export default function Navbar({ token, logout }) {
                     style={{
                       position: 'absolute', top: 'calc(100% + 10px)', right: 0,
                       minWidth: '200px',
-                      background: 'rgba(10,6,26,0.97)',
+                      background: 'var(--bg-overlay)',
                       border: '1px solid var(--border)',
                       borderRadius: 'var(--r-lg)',
                       boxShadow: 'var(--shadow-xl)',
@@ -155,7 +157,11 @@ export default function Navbar({ token, logout }) {
                 </li>
               ))}
             </ul>
-            <div style={{ marginTop: '1rem', display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
+            <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ThemeToggle size="sm" />
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Toggle theme</span>
+            </div>
+            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.75rem', flexDirection: 'column' }}>
               {token && username ? (
                 <>
                   <Link to="/profile"  className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={15} /> My Profile</Link>

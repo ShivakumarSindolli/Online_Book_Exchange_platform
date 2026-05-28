@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import { ThemeProvider, useTheme } from './hooks/useTheme';
+
 import Navbar   from './components/Navbar';
 import Home     from './components/Home';
 import Footer   from './components/Footer';
@@ -31,19 +33,21 @@ function AppContent() {
   const handleSetToken = (t) => { localStorage.setItem('token', t); setToken(t); };
   const logout = () => { localStorage.removeItem('token'); setToken(null); };
 
+  const { isDark } = useTheme();
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <ToastContainer
         position="bottom-right"
         autoClose={3000}
-        theme="dark"
+        theme={isDark ? 'dark' : 'light'}
         toastStyle={{
-          background: 'rgba(12,7,28,0.95)',
-          border: '1px solid rgba(168,85,247,0.25)',
-          color: '#f8fafc',
+          background: isDark ? 'rgba(12,7,28,0.95)' : 'rgba(255,255,255,0.95)',
+          border: `1px solid ${isDark ? 'rgba(168,85,247,0.25)' : 'rgba(79,70,229,0.15)'}`,
+          color: isDark ? '#f8fafc' : '#1E293B',
           borderRadius: '12px',
           backdropFilter: 'blur(20px)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+          boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.1)',
         }}
       />
       <Navbar token={token} logout={logout} />
@@ -67,9 +71,11 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </ThemeProvider>
   );
 }
 

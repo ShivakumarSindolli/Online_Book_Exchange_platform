@@ -42,9 +42,9 @@ export default function AddBook({ token }) {
 
   const inputStyle = {
     width: '100%',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    color: '#f8fafc',
+    background: 'var(--bg-surface)',
+    border: '1px solid var(--border)',
+    color: 'var(--text-1)',
     borderRadius: '10px',
     padding: '0.65rem 0.9rem',
     fontSize: '0.9rem',
@@ -55,7 +55,7 @@ export default function AddBook({ token }) {
   const labelStyle = {
     fontSize: '0.73rem', fontWeight: 700,
     textTransform: 'uppercase', letterSpacing: '0.08em',
-    color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem',
+    color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '0.35rem',
     marginBottom: '0.4rem',
   };
 
@@ -67,7 +67,7 @@ export default function AddBook({ token }) {
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
         style={{
           width: '100%', maxWidth: '560px',
-          background: 'rgba(12,7,28,0.90)',
+          background: 'var(--bg-overlay)',
           border: '1px solid rgba(99,102,241,0.2)',
           borderRadius: '20px',
           padding: '2.5rem 2.25rem',
@@ -128,14 +128,18 @@ export default function AddBook({ token }) {
             <div>
               <label style={labelStyle}><Tag size={11} /> Condition</label>
               <select name="condition" value={form.condition} onChange={handleChange} style={{ ...inputStyle, cursor: 'pointer' }} required>
-                {['New','Like New','Good','Fair','Used'].map(c => <option key={c} style={{ background: '#0c071c' }}>{c}</option>)}
+                {['New','Like New','Good','Fair','Used'].map(c => (
+                  <option key={c} style={{ background: 'var(--bg-overlay)', color: 'var(--text-1)' }}>
+                    {c}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
               <label style={labelStyle}><Tag size={11} /> Type</label>
               <select name="type" value={form.type} onChange={handleChange} style={{ ...inputStyle, cursor: 'pointer' }} required>
-                <option value="lend" style={{ background: '#0c071c' }}>Lend</option>
-                <option value="sell" style={{ background: '#0c071c' }}>Sell</option>
+                <option value="lend" style={{ background: 'var(--bg-overlay)', color: 'var(--text-1)' }}>Lend</option>
+                <option value="sell" style={{ background: 'var(--bg-overlay)', color: 'var(--text-1)' }}>Sell</option>
               </select>
             </div>
           </div>

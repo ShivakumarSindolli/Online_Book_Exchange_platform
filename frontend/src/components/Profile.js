@@ -96,7 +96,7 @@ export default function Profile({ token }) {
                                 <span><i className="bi bi-geo-alt me-2 text-danger"></i>{profile.city}, {profile.state}</span>
                             </div>
                             <div className="d-flex justify-content-center align-items-center mb-4">
-                                <div className="p-3 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)' }}>
+                                <div className="p-3 rounded" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
                                     <div className="d-flex align-items-center">
                                         <StarRating rating={profile.averageRating} readOnly={true} />
                                         <span className="ms-3 fw-bold fs-5">{profile.averageRating}</span>
@@ -122,7 +122,7 @@ export default function Profile({ token }) {
                                 {profile.ratings.length > 0 ? (
                                     <div className="list-group list-group-flush gap-2">
                                         {profile.ratings.map((r, i) => (
-                                            <div key={r._id} className="list-group-item rounded border-0" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                                            <div key={r._id} className="list-group-item rounded border-0" style={{ background: 'var(--bg-surface)' }}>
                                                 <div className="d-flex justify-content-between align-items-start mb-2">
                                                     <div>
                                                         <strong style={{ color: 'var(--text-primary)' }}>{r.user?.username || 'A user'}</strong>
@@ -156,7 +156,7 @@ export default function Profile({ token }) {
                                 {givenRatings.length > 0 ? (
                                     <div className="list-group list-group-flush gap-2">
                                         {givenRatings.map((r, i) => (
-                                            <div key={r._id} className="list-group-item rounded border-0" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                                            <div key={r._id} className="list-group-item rounded border-0" style={{ background: 'var(--bg-surface)' }}>
                                                 <div className="d-flex justify-content-between align-items-start mb-2">
                                                     <div>
                                                         <span className="text-muted me-1">To</span>

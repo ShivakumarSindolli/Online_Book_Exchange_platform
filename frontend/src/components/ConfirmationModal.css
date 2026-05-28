@@ -11,34 +11,34 @@
 }
 
 .modal-content {
-  background: rgba(17, 24, 39, 0.95) !important;
+  background: var(--bg-overlay) !important;
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border-glass) !important;
-  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-lg) !important;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-card);
   animation: scaleIn 0.3s ease;
 }
 
 .modal-header {
   position: relative;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-glass);
+  border-bottom: 1px solid var(--border);
 }
 .modal-header .btn-close {
   position: absolute;
   top: 1rem;
   right: 1.5rem;
 }
-.modal-title { color: var(--text-primary); }
+.modal-title { color: var(--text-1); }
 
 .modal-body {
   padding: 1.5rem;
-  color: var(--text-secondary);
+  color: var(--text-3);
 }
 
 .modal-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border-glass);
+  border-top: 1px solid var(--border);
 }

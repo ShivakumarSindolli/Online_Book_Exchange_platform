@@ -30,9 +30,9 @@ export default function RatingModal({ show, onClose, onSubmit, title }) {
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="modal-body card-body text-center">
-                        <p style={{ color: 'var(--text-secondary)' }}>How was your experience with this exchange? Please leave a rating.</p>
+                        <p style={{ color: 'var(--text-2)' }}>How was your experience with this exchange? Please leave a rating.</p>
                         
-                        <div className="mb-4 d-flex justify-content-center p-3 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-glass)' }}>
+                        <div className="mb-4 d-flex justify-content-center p-3 rounded" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)' }}>
                            <StarRating rating={rating} onRating={setRating} hoverRating={hoverRating} onHover={setHoverRating} />
                         </div>
 

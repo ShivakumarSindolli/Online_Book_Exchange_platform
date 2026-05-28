@@ -29,8 +29,8 @@ export default function EditProfileModal({ show, onClose, currentUser, onUpdate 
             <div className="modal-content card card-ui" style={{ maxWidth: '600px' }}>
                 <div className="modal-header card-header border-bottom">
                     <h5 className="modal-title card-title mb-0 d-flex align-items-center">
-                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-gradient-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
-                            <i className="bi bi-person-gear" style={{ color: 'var(--accent-blue)', fontSize: '1.2rem' }}></i>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px' }}>
+                            <i className="bi bi-person-gear" style={{ color: 'var(--indigo)', fontSize: '1.2rem' }}></i>
                         </div>
                         Edit Your Profile
                     </h5>

@@ -86,7 +86,7 @@ export default function ChatModal({ token, request, onClose, currentUserId }) {
 
   return (
     <div className="chat-modal-overlay">
-      <div className="chat-modal-content">
+      <div className="chat-modal-content modal-content" style={{ color: 'var(--text-1)' }}>
         <div className="chat-modal-header">
           <h5>Chat about: {request.bookId.title}</h5>
           <button onClick={onClose} className="btn-close"></button>
