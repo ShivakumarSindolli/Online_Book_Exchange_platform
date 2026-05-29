@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useSpring, useScroll, useInView, AnimatePresence } from 'framer-motion';
 import {
   BookOpen, ArrowLeftRight, PlusCircle, MessageSquare,
   Bookmark, Star, Search, Users, TrendingUp, MapPin,
-  ArrowRight, Zap, Shield, Heart, Layers, Globe, Sparkles
+  ArrowRight, Zap, Shield, Heart, Layers, Globe, Sparkles,
+  Quote, ChevronRight, Library, BookMarked, Flame, Award
 } from 'lucide-react';
 import HeroImageCarousel from './HeroImageCarousel';
 
@@ -12,31 +13,77 @@ import HeroImageCarousel from './HeroImageCarousel';
    ANIMATION HELPERS
    ══════════════════════════════════════════════════════════════ */
 const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 32 },
+  initial: { opacity: 0, y: 40 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] },
+  viewport: { once: true, amount: 0.15 },
+  transition: { duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] },
+});
+
+const fadeScale = (delay = 0) => ({
+  initial: { opacity: 0, scale: 0.9 },
+  whileInView: { opacity: 1, scale: 1 },
+  viewport: { once: true, amount: 0.15 },
+  transition: { duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] },
 });
 
 const stagger = {
   initial: {},
   whileInView: {},
   viewport: { once: true },
-  transition: { staggerChildren: 0.1 },
+  transition: { staggerChildren: 0.12 },
 };
 
 const childFade = {
-  initial: { opacity: 0, y: 24 },
+  initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
-  transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
 };
 
 /* ══════════════════════════════════════════════════════════════
-   PARTICLE SYSTEM — Floating luminous dots in the hero
+   TYPING EFFECT
+   ══════════════════════════════════════════════════════════════ */
+function TypingText({ words, className }) {
+  const [index, setIndex] = useState(0);
+  const [text, setText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const word = words[index];
+    const timeout = setTimeout(() => {
+      if (!deleting) {
+        setText(word.substring(0, text.length + 1));
+        if (text.length + 1 === word.length) {
+          setTimeout(() => setDeleting(true), 1800);
+        }
+      } else {
+        setText(word.substring(0, text.length - 1));
+        if (text.length === 0) {
+          setDeleting(false);
+          setIndex((i) => (i + 1) % words.length);
+        }
+      }
+    }, deleting ? 40 : 80);
+    return () => clearTimeout(timeout);
+  }, [text, deleting, index, words]);
+
+  return (
+    <span className={className}>
+      {text}
+      <motion.span
+        animate={{ opacity: [1, 0] }}
+        transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
+        style={{ display: 'inline-block', width: '3px', height: '1em', background: 'var(--violet)', marginLeft: '2px', verticalAlign: 'text-bottom' }}
+      />
+    </span>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PARTICLE SYSTEM
    ══════════════════════════════════════════════════════════════ */
 function ParticleField() {
   const particles = useMemo(() =>
-    Array.from({ length: 40 }, (_, i) => ({
+    Array.from({ length: 50 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -80,9 +127,8 @@ function ParticleField() {
   );
 }
 
-
 /* ══════════════════════════════════════════════════════════════
-   MOUSE PARALLAX — Move hero elements based on cursor position
+   MOUSE PARALLAX
    ══════════════════════════════════════════════════════════════ */
 function useMouseParallax() {
   const mouseX = useMotionValue(0);
@@ -105,7 +151,7 @@ function useMouseParallax() {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   3D TILT WRAPPER — Gives children a 3D tilt on mouse hover
+   3D TILT WRAPPER
    ══════════════════════════════════════════════════════════════ */
 function Tilt3D({ children, intensity = 10, glare = true, style = {} }) {
   const ref = useRef(null);
@@ -114,8 +160,8 @@ function Tilt3D({ children, intensity = 10, glare = true, style = {} }) {
   const springX = useSpring(rotateX, { stiffness: 200, damping: 25 });
   const springY = useSpring(rotateY, { stiffness: 200, damping: 25 });
   const glareOpacity = useMotionValue(0);
-  const glareX = useMotionValue(50);
-  const glareY = useMotionValue(50);
+  const glareXVal = useMotionValue(50);
+  const glareYVal = useMotionValue(50);
 
   const handleMove = (e) => {
     if (!ref.current) return;
@@ -125,8 +171,8 @@ function Tilt3D({ children, intensity = 10, glare = true, style = {} }) {
     rotateX.set(-y * intensity);
     rotateY.set(x * intensity);
     glareOpacity.set(0.15);
-    glareX.set((x + 0.5) * 100);
-    glareY.set((y + 0.5) * 100);
+    glareXVal.set((x + 0.5) * 100);
+    glareYVal.set((y + 0.5) * 100);
   };
 
   const handleLeave = () => {
@@ -136,7 +182,7 @@ function Tilt3D({ children, intensity = 10, glare = true, style = {} }) {
   };
 
   const glareBackground = useTransform(
-    [glareX, glareY],
+    [glareXVal, glareYVal],
     ([gx, gy]) => `radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,0.2), transparent 60%)`
   );
 
@@ -172,7 +218,7 @@ function Tilt3D({ children, intensity = 10, glare = true, style = {} }) {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   ANIMATED COUNTER — Counts up numbers on scroll
+   ANIMATED COUNTER
    ══════════════════════════════════════════════════════════════ */
 function AnimatedCounter({ target, suffix = '' }) {
   const [count, setCount] = useState(0);
@@ -205,36 +251,67 @@ function AnimatedCounter({ target, suffix = '' }) {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   MARQUEE
+   ══════════════════════════════════════════════════════════════ */
+function InfiniteMarquee({ items, speed = 30 }) {
+  return (
+    <div className="marquee-wrapper">
+      <motion.div
+        className="marquee-track"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: speed, repeat: Infinity, ease: 'linear' }}
+      >
+        {[...items, ...items].map((item, i) => (
+          <div key={i} className="marquee-item">
+            <span style={{ color: 'var(--violet)', display: 'flex' }}>{item.icon}</span>
+            <span>{item.text}</span>
+          </div>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
    DATA
    ══════════════════════════════════════════════════════════════ */
 const features = [
-  { icon: <Search size={22} />,         color: '#6366f1', title: 'Browse & Discover',   desc: 'Search thousands of books by genre, condition, or location. Filter to find exactly what you love.' },
-  { icon: <ArrowLeftRight size={22} />, color: '#a855f7', title: 'Book Exchange',        desc: 'Send requests and swap books with members in your city. No money needed — just love for reading.' },
-  { icon: <PlusCircle size={22} />,     color: '#f472b6', title: 'List Your Books',      desc: 'Upload books you no longer need with photos and a description. Done in under 60 seconds.' },
-  { icon: <MessageSquare size={22} />,  color: '#22d3ee', title: 'Real‑time Chat',       desc: 'Coordinate pickups and negotiate exchanges via built-in live messaging with any book owner.' },
-  { icon: <Bookmark size={22} />,       color: '#fb923c', title: 'Wishlist',             desc: 'Save books for later. Get notified the moment a wishlisted title becomes available near you.' },
-  { icon: <Star size={22} />,           color: '#facc15', title: 'Ratings & Reviews',   desc: 'Rate every exchange. Build a trusted reputation that makes future swaps faster and easier.' },
+  { icon: <Search size={24} />,         color: '#6366f1', title: 'Browse & Discover',   desc: 'Search thousands of books by genre, condition, or location. Filter to find exactly what you love.' },
+  { icon: <ArrowLeftRight size={24} />, color: '#a855f7', title: 'Book Exchange',        desc: 'Send requests and swap books with members in your city. No money needed — just love for reading.' },
+  { icon: <PlusCircle size={24} />,     color: '#f472b6', title: 'List Your Books',      desc: 'Upload books you no longer need with photos and a description. Done in under 60 seconds.' },
+  { icon: <MessageSquare size={24} />,  color: '#22d3ee', title: 'Real‑time Chat',       desc: 'Coordinate pickups and negotiate exchanges via built-in live messaging with any book owner.' },
+  { icon: <Bookmark size={24} />,       color: '#fb923c', title: 'Wishlist',             desc: 'Save books for later. Get notified the moment a wishlisted title becomes available near you.' },
+  { icon: <Star size={24} />,           color: '#facc15', title: 'Ratings & Reviews',   desc: 'Rate every exchange. Build a trusted reputation that makes future swaps faster and easier.' },
 ];
 
 const steps = [
-  { num: '01', title: 'Create Your Account', desc: 'Sign up in seconds. Add your city and start exploring books in your community immediately.' },
-  { num: '02', title: 'List or Browse',       desc: 'Upload books you want to share, or search through what community members have listed.' },
-  { num: '03', title: 'Request & Exchange',   desc: 'Send a request, chat with the owner, and arrange a convenient pickup — completely free.' },
+  { num: '01', title: 'Create Your Account', desc: 'Sign up in seconds. Add your city and start exploring.', icon: <Users size={28} /> },
+  { num: '02', title: 'List or Browse',       desc: 'Upload books to share or search community listings.', icon: <Library size={28} /> },
+  { num: '03', title: 'Request & Exchange',   desc: 'Chat with owners and arrange a convenient pickup — free.', icon: <ArrowLeftRight size={28} /> },
 ];
 
 const stats = [
-  { value: '10', suffix: 'K+', label: 'Books Listed',    icon: <BookOpen size={20} /> },
-  { value: '5',  suffix: 'K+', label: 'Active Members',  icon: <Users size={20} /> },
-  { value: '8',  suffix: 'K+', label: 'Exchanges Done',  icon: <TrendingUp size={20} /> },
-  { value: '50', suffix: '+',  label: 'Cities Covered',  icon: <MapPin size={20} /> },
+  { value: '10', suffix: 'K+', label: 'Books Listed',    icon: <BookOpen size={22} /> },
+  { value: '5',  suffix: 'K+', label: 'Active Members',  icon: <Users size={22} /> },
+  { value: '8',  suffix: 'K+', label: 'Exchanges Done',  icon: <TrendingUp size={22} /> },
+  { value: '50', suffix: '+',  label: 'Cities Covered',  icon: <MapPin size={22} /> },
 ];
 
-const pillars = [
+const marqueeItems = [
   { icon: <Zap size={16} />,       text: 'Instant Matching' },
   { icon: <Shield size={16} />,    text: 'Verified Members' },
   { icon: <Heart size={16} />,     text: 'Community First' },
   { icon: <Globe size={16} />,     text: 'Global Reach' },
   { icon: <Layers size={16} />,    text: 'Smart Catalog' },
+  { icon: <Flame size={16} />,     text: 'Trending Now' },
+  { icon: <Award size={16} />,     text: 'Top Rated' },
+  { icon: <BookMarked size={16} />,text: 'Curated Lists' },
+];
+
+const testimonials = [
+  { name: 'Priya S.', role: 'Avid Reader', text: 'This platform changed how I read. I\'ve exchanged over 30 books and met amazing people!', color: '#a855f7' },
+  { name: 'Rahul M.', role: 'Book Collector', text: 'Finally a place where my old books find new homes. The chat feature is super smooth.', color: '#6366f1' },
+  { name: 'Sneha K.', role: 'Student', text: 'Saved so much money on textbooks. The wishlist feature notifies me instantly!', color: '#f472b6' },
 ];
 
 /* ══════════════════════════════════════════════════════════════
@@ -256,13 +333,10 @@ export default function Home() {
       {/* ═════════════════ HERO ═════════════════ */}
       <section className="hero" style={{ minHeight: '100vh', paddingTop: '7rem', position: 'relative' }}>
 
-        {/* Particle field */}
         <ParticleField />
 
         {/* Animated gradient mesh */}
-        <div style={{
-          position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0,
-        }}>
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
           <div className="hero-mesh" />
         </div>
 
@@ -271,7 +345,7 @@ export default function Home() {
         <motion.div className="hero-orb hero-orb-2" style={{ x: orbX2, y: orbY2 }} />
         <motion.div className="hero-orb hero-orb-3" style={{ x: orbX3, y: orbY3 }} />
 
-        {/* Extra animated orbs */}
+        {/* Extra animated orb */}
         <motion.div
           animate={{ scale: [1, 1.3, 1], opacity: [0.12, 0.25, 0.12] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
@@ -303,10 +377,13 @@ export default function Home() {
             </motion.div>
           </motion.div>
 
-          {/* Headline */}
+          {/* Headline with typing effect */}
           <motion.h1 {...fadeUp(0.1)} className="hero-title">
             Share Books.<br />
-            <span className="text-grad hero-title-animated">Build Community.</span>
+            <TypingText
+              words={['Build Community.', 'Discover Stories.', 'Connect Readers.', 'Spark Joy.']}
+              className="text-grad hero-title-animated"
+            />
           </motion.h1>
 
           {/* Sub */}
@@ -315,49 +392,21 @@ export default function Home() {
             Turn your shelf into someone else's next adventure — completely free.
           </motion.p>
 
-          {/* Pillar chips */}
-          <motion.div {...fadeUp(0.25)} style={{
-            display: 'flex', justifyContent: 'center', gap: '0.6rem',
-            flexWrap: 'wrap', marginBottom: '2.5rem',
-          }}>
-            {pillars.map((p, i) => (
-              <motion.span
-                key={i}
-                whileHover={{ scale: 1.08, y: -2 }}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                  fontSize: '0.78rem', fontWeight: 600,
-                  color: 'var(--text-2)',
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--r-full)',
-                  padding: '0.35rem 0.85rem',
-                  backdropFilter: 'blur(12px)',
-                  cursor: 'default',
-                  transition: 'border-color 0.2s ease',
-                }}
-              >
-                <span style={{ color: 'var(--violet)' }}>{p.icon}</span>{p.text}
-              </motion.span>
-            ))}
-          </motion.div>
-
           {/* CTAs */}
           <motion.div {...fadeUp(0.3)} className="hero-cta">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-              <Link to="/browse" className="btn btn-primary btn-lg">
+              <Link to="/browse" className="btn btn-primary btn-lg" style={{ gap: '0.6rem' }}>
                 <Search size={18} /> Browse Books
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-              <Link to="/register" className="btn btn-ghost btn-lg">
+              <Link to="/register" className="btn btn-ghost btn-lg" style={{ gap: '0.6rem' }}>
                 Get Started Free <ArrowRight size={18} />
               </Link>
             </motion.div>
           </motion.div>
 
-
-          {/* ── Hero Image Carousel with 3D Tilt ── */}
+          {/* Hero Image Carousel with 3D Tilt */}
           <motion.div {...fadeUp(0.38)} style={{ marginBottom: '3rem' }}>
             <Tilt3D intensity={6} style={{ borderRadius: 'var(--r-xl)' }}>
               <HeroImageCarousel />
@@ -366,13 +415,20 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═════════════════ MARQUEE STRIP ═════════════════ */}
+      <section className="marquee-section">
+        <InfiniteMarquee items={marqueeItems} speed={25} />
+      </section>
+
       {/* ═════════════════ STATS STRIP ═════════════════ */}
       <section style={{ padding: '0 1.5rem 5rem' }}>
         <motion.div {...fadeUp(0)} className="container">
           <div className="stats-strip">
             {stats.map((s, i) => (
               <motion.div key={i} {...childFade} className="stats-strip-item" style={{ animationDelay: `${i * 0.1}s` }}>
-                <div style={{ color: 'var(--violet)', marginBottom: '0.6rem', display: 'flex', justifyContent: 'center' }}>{s.icon}</div>
+                <div className="stats-icon-wrap">
+                  {s.icon}
+                </div>
                 <div className="stats-strip-value">
                   <AnimatedCounter target={s.value} suffix={s.suffix} />
                 </div>
@@ -383,10 +439,10 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ═════════════════ FEATURES ═════════════════ */}
+      {/* ═════════════════ BENTO FEATURES ═════════════════ */}
       <section className="section">
         <div className="container">
-          <motion.div {...fadeUp(0)} className="text-center" style={{ marginBottom: '3.5rem' }}>
+          <motion.div {...fadeUp(0)} className="text-center" style={{ marginBottom: '4rem' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
               <span className="section-tag"><Zap size={13} /> Everything You Need</span>
             </div>
@@ -398,12 +454,14 @@ export default function Home() {
             </p>
           </motion.div>
 
-          <motion.div
-            {...stagger}
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.25rem' }}
-          >
+          <div className="bento-grid">
             {features.map((f, i) => (
-              <motion.div key={i} {...childFade} className="feature-card">
+              <motion.div
+                key={i}
+                {...fadeScale(i * 0.08)}
+                className="bento-card"
+              >
+                <div className="bento-card-glow" style={{ background: `radial-gradient(circle at 30% 30%, ${f.color}15, transparent 70%)` }} />
                 <div
                   className="feature-icon"
                   style={{
@@ -416,16 +474,17 @@ export default function Home() {
                 </div>
                 <h3 className="feature-title">{f.title}</h3>
                 <p className="feature-desc">{f.desc}</p>
+                <div className="bento-card-line" style={{ background: `linear-gradient(90deg, ${f.color}, transparent)` }} />
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ═════════════════ HOW IT WORKS ═════════════════ */}
+      {/* ═════════════════ HOW IT WORKS — Timeline ═════════════════ */}
       <section className="section" style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
-          <motion.div {...fadeUp(0)} className="text-center" style={{ marginBottom: '3.5rem' }}>
+          <motion.div {...fadeUp(0)} className="text-center" style={{ marginBottom: '4rem' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
               <span className="section-tag" style={{ color: 'var(--cyan)', background: 'rgba(34,211,238,0.1)', borderColor: 'rgba(34,211,238,0.2)' }}>
                 <ArrowLeftRight size={13} /> Simple Process
@@ -435,36 +494,100 @@ export default function Home() {
             <p className="section-subtitle">Three simple steps to start exchanging books with your community.</p>
           </motion.div>
 
-          <motion.div {...stagger} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
+          <div className="timeline-container">
             {steps.map((s, i) => (
-              <motion.div key={i} {...childFade} className="step-card">
-                <div className="step-number">{s.num}</div>
-                <h3 className="step-title">{s.title}</h3>
-                <p className="step-desc">{s.desc}</p>
+              <motion.div key={i} {...fadeUp(i * 0.15)} className="timeline-step">
+                <div className="timeline-icon-wrap">
+                  <motion.div
+                    className="timeline-icon"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    {s.icon}
+                  </motion.div>
+                  {i < steps.length - 1 && <div className="timeline-connector" />}
+                </div>
+                <div className="timeline-content">
+                  <span className="timeline-num">{s.num}</span>
+                  <h3 className="step-title">{s.title}</h3>
+                  <p className="step-desc">{s.desc}</p>
+                </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═════════════════ TESTIMONIALS ═════════════════ */}
+      <section className="section">
+        <div className="container">
+          <motion.div {...fadeUp(0)} className="text-center" style={{ marginBottom: '4rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <span className="section-tag" style={{ color: '#f472b6', background: 'rgba(244,114,182,0.1)', borderColor: 'rgba(244,114,182,0.2)' }}>
+                <Heart size={13} /> Community Love
+              </span>
+            </div>
+            <h2 className="section-title">What Readers <span className="text-grad">Say</span></h2>
+            <p className="section-subtitle">Join thousands of happy readers who are already sharing books.</p>
           </motion.div>
+
+          <div className="testimonial-grid">
+            {testimonials.map((t, i) => (
+              <motion.div key={i} {...fadeUp(i * 0.12)} className="testimonial-card">
+                <div className="testimonial-quote-icon" style={{ color: t.color }}>
+                  <Quote size={24} />
+                </div>
+                <p className="testimonial-text">{t.text}</p>
+                <div className="testimonial-author">
+                  <div className="testimonial-avatar" style={{ background: `linear-gradient(135deg, ${t.color}, ${t.color}88)` }}>
+                    {t.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="testimonial-name">{t.name}</div>
+                    <div className="testimonial-role">{t.role}</div>
+                  </div>
+                </div>
+                <div className="testimonial-glow" style={{ background: `radial-gradient(circle at 50% 100%, ${t.color}12, transparent 70%)` }} />
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ═════════════════ CTA BANNER ═════════════════ */}
       <section className="section">
         <div className="container">
-          <motion.div {...fadeUp(0)} className="cta-banner">
-            <motion.div {...fadeUp(0.1)}>
+          <motion.div {...fadeUp(0)} className="cta-banner-premium">
+            {/* Animated background elements */}
+            <div className="cta-bg-element cta-bg-1" />
+            <div className="cta-bg-element cta-bg-2" />
+            <div className="cta-bg-element cta-bg-3" />
+
+            <motion.div {...fadeUp(0.1)} style={{ position: 'relative', zIndex: 1 }}>
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                style={{ display: 'inline-block', marginBottom: '1.5rem' }}
+              >
+                <BookOpen size={40} style={{ color: '#c084fc' }} />
+              </motion.div>
               <h2 className="cta-banner-title">
-                Ready to Start Exchanging?
+                Ready to Start <span className="text-grad">Exchanging?</span>
               </h2>
               <p className="cta-banner-subtitle">
                 Join thousands of readers already sharing books and building real community connections.
               </p>
               <div className="cta-actions">
-                <Link to="/register" className="btn btn-primary btn-lg">
-                  <BookOpen size={18} /> Create Free Account
-                </Link>
-                <Link to="/browse" className="btn btn-ghost btn-lg">
-                  <Search size={18} /> Browse Books First
-                </Link>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                  <Link to="/register" className="btn btn-primary btn-lg">
+                    <BookOpen size={18} /> Create Free Account
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                  <Link to="/browse" className="btn btn-ghost btn-lg">
+                    <Search size={18} /> Browse Books First
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
           </motion.div>
