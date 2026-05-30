@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
@@ -39,6 +39,7 @@ app.use('/api/books', require('./routes/bookRoutes'));
 app.use('/api/requests', require('./routes/requestRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/user', require('./routes/userRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 io.on('connection', (socket) => {
   

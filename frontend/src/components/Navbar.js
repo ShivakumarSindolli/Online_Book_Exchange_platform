@@ -4,12 +4,13 @@ import { jwtDecode } from 'jwt-decode';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen, Search, PlusCircle, ArrowLeftRight, User, Star,
-  ChevronDown, LogOut, Menu, X, Library
+  ChevronDown, LogOut, Menu, X, Library, Shield
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 export default function Navbar({ token, logout }) {
   const [username, setUsername] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -18,9 +19,12 @@ export default function Navbar({ token, logout }) {
 
   useEffect(() => {
     if (token) {
-      try { setUsername(jwtDecode(token).username); }
-      catch { logout(); }
-    } else { setUsername(null); }
+      try {
+        const decoded = jwtDecode(token);
+        setUsername(decoded.username);
+        setIsAdmin(decoded.role === 'admin');
+      } catch { logout(); }
+    } else { setUsername(null); setIsAdmin(false); }
   }, [token, logout]);
 
   useEffect(() => {
@@ -107,6 +111,7 @@ export default function Navbar({ token, logout }) {
                       { to: '/profile',  icon: <User size={15} />,      label: 'My Profile' },
                       { to: '/my-books', icon: <Library size={15} />,   label: 'My Books' },
                       { to: '/wishlist', icon: <Star size={15} />,       label: 'My Wishlist' },
+                      ...(isAdmin ? [{ to: '/admin', icon: <Shield size={15} />, label: 'Admin Panel' }] : []),
                     ].map(item => (
                       <Link key={item.to} to={item.to} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-2)', textDecoration: 'none' }}>
                         <span style={{ color: 'var(--text-3)' }}>{item.icon}</span>{item.label}
@@ -167,6 +172,7 @@ export default function Navbar({ token, logout }) {
                   <Link to="/profile"  className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><User size={15} /> My Profile</Link>
                   <Link to="/my-books" className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Library size={15} /> My Books</Link>
                   <Link to="/wishlist" className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Star size={15} /> My Wishlist</Link>
+                  {isAdmin && <Link to="/admin" className="navbar-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c084fc' }}><Shield size={15} /> Admin Panel</Link>}
                   <button onClick={handleLogout} className="btn btn-ghost btn-sm" style={{ width: '100%', color: '#f87171', justifyContent: 'flex-start' }}>
                     <LogOut size={15} /> Logout
                   </button>

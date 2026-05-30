@@ -16,6 +16,8 @@ import Requests from './components/Requests';
 import MyBooks  from './components/MyBooks';
 import Profile  from './components/Profile';
 import Wishlist from './components/Wishlist';
+import AdminPanel from './components/AdminPanel';
+import './components/AdminPanel.css';
 
 import './index.css';
 import './App.css';
@@ -62,6 +64,7 @@ function AppContent() {
           <Route path="/my-books" element={<MyBooks  token={token} />} />
           <Route path="/profile"  element={<Profile  token={token} />} />
           <Route path="/wishlist" element={<Wishlist token={token} />} />
+          <Route path="/admin" element={<AdminPanel token={token} />} />
         </Routes>
       </main>
       <Footer />

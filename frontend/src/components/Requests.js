@@ -151,12 +151,12 @@ function RequestCard({ req, type, currentUserId, onAccept, onReject, onMarkSent,
               fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-1)',
               margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
-              {req.bookId.title}
+              {req.bookId?.title || 'Deleted Book'}
             </h4>
           </div>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', margin: 0 }}>
             {isIncoming ? 'Requested by' : 'Owned by'}{' '}
-            <span style={{ fontWeight: 600, color: 'var(--text-2)' }}>{counterparty.username}</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-2)' }}>{counterparty?.username || 'Unknown'}</span>
           </p>
         </div>
         <StatusBadge status={req.status} deliveryStatus={req.deliveryStatus} />
@@ -276,7 +276,10 @@ export default function Requests({ token }) {
     if (!token) { navigate('/login'); return; }
     const decoded = jwtDecode(token);
     setCurrentUserId(decoded.userId);
-    fetch('http://127.0.0.1:5000/api/requests', { headers: { Authorization: `Bearer ${token}` }})
+    fetch(`http://127.0.0.1:5000/api/requests?_t=${Date.now()}`, { 
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store'
+    })
       .then(res => res.json())
       .then(data => setRequests(Array.isArray(data) ? data : []))
       .catch((err) => { console.error(err); setRequests([]); });
@@ -344,9 +347,9 @@ export default function Requests({ token }) {
   };
 
   const infoToShow = contactInfo && contactInfo.owner ? (currentUserId === contactInfo.owner._id ? contactInfo.requester : contactInfo.owner) : null;
-  const incoming = requests.filter(req => req.ownerId._id === currentUserId);
-  const outgoing = requests.filter(req => req.requesterId._id === currentUserId);
-  const hasUserRated = (req) => req.ownerId._id === currentUserId ? req.isRatedByOwner : req.isRatedByRequester;
+  const incoming = requests.filter(req => req.ownerId?._id === currentUserId);
+  const outgoing = requests.filter(req => req.requesterId?._id === currentUserId);
+  const hasUserRated = (req) => req.ownerId?._id === currentUserId ? req.isRatedByOwner : req.isRatedByRequester;
   const activeRequests = activeTab === 'incoming' ? incoming : outgoing;
 
   return (

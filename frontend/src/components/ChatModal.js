@@ -127,7 +127,7 @@ export default function ChatModal({ token, request, onClose, currentUserId }) {
               </div>
               <div>
                 <h3 style={{ fontSize: '0.98rem', fontWeight: 700, color: 'var(--text-1)', margin: 0 }}>
-                  {request.bookId.title}
+                  {request.bookId?.title || 'Book Exchange'}
                 </h3>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                   <MessageSquare size={11} /> Live Exchange Chat
@@ -171,7 +171,7 @@ export default function ChatModal({ token, request, onClose, currentUserId }) {
               </div>
             ) : (
               messages.map((msg, idx) => {
-                const isMe = msg.senderId._id === currentUserId;
+                const isMe = (msg.senderId?._id || msg.senderId) === currentUserId;
                 return (
                   <motion.div
                     key={msg._id || idx}

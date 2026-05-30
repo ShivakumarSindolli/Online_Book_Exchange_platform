@@ -16,9 +16,14 @@ const userSchema = new mongoose.Schema({
   city: { type: String, required: true },
   state: { type: String, required: true },
 
+  // --- ROLE FIELD ---
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+
   // --- NEW FIELDS ---
   wishlist: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
   ratings: [RatingSchema],
+
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Add a virtual property to calculate the average rating
