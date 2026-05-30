@@ -36,7 +36,7 @@ export default function BrowseBooks({ token }) {
     setLoading(true);
     setError(null);
     try {
-      const url = `http://127.0.0.1:5000/api/books?city=${city}&state=${state}&_t=${Date.now()}`;
+      const url = `https://online-book-exchange-platform-hpp1.onrender.com/api/books?city=${city}&state=${state}&_t=${Date.now()}`;
       console.log('[BrowseBooks] Fetching:', url);
       const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText || 'Error'}`);
@@ -54,7 +54,7 @@ export default function BrowseBooks({ token }) {
 
   const fetchWishlist = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/user/wishlist', {
+      const res = await fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/user/wishlist', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -70,7 +70,7 @@ export default function BrowseBooks({ token }) {
   const handleRequest = async (bookId) => {
     if (!token) { toast.warn('Please log in to make a request.'); navigate('/login'); return; }
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/requests', {
+      const res = await fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ bookId }),
@@ -84,7 +84,7 @@ export default function BrowseBooks({ token }) {
   const handleWishlist = async (bookId) => {
     if (!token) { toast.warn('Please log in to add to wishlist.'); return; }
     try {
-      await fetch(`http://127.0.0.1:5000/api/user/wishlist/${bookId}`, {
+      await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/user/wishlist/${bookId}`, {
         method: 'POST', headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Added to wishlist!');
@@ -192,7 +192,7 @@ export default function BrowseBooks({ token }) {
                   {/* Cover */}
                   <div className="book-cover">
                     {book.imageUrl ? (
-                      <img src={`http://127.0.0.1:5000${book.imageUrl}`} alt={book.title} />
+                      <img src={book.imageUrl.startsWith('http') ? book.imageUrl : `https://online-book-exchange-platform-hpp1.onrender.com${book.imageUrl}`} alt={book.title} />
                     ) : (
                       <div className="book-cover-placeholder">
                         <BookOpen size={44} />

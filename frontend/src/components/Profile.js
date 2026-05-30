@@ -26,8 +26,8 @@ export default function Profile({ token }) {
     if (!token) return;
     try {
       const [profileRes, givenRatingsRes] = await Promise.all([
-        fetch('http://127.0.0.1:5000/api/user/profile', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('http://127.0.0.1:5000/api/user/ratings/given', { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/user/profile', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/user/ratings/given', { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
       if (!profileRes.ok || !givenRatingsRes.ok) throw new Error('Failed to fetch profile data');
       const profileData = await profileRes.json();
@@ -54,7 +54,7 @@ export default function Profile({ token }) {
 
   const handleProfileUpdate = async (updatedData) => {
     try {
-      await fetch('http://127.0.0.1:5000/api/user/profile', {
+      await fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(updatedData)

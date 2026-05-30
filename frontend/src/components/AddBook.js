@@ -27,7 +27,7 @@ export default function AddBook({ token }) {
     for (const key in form) formData.append(key, form[key]);
     if (image) formData.append('image', image);
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/books', {
+      const res = await fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/books', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

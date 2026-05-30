@@ -276,7 +276,7 @@ export default function Requests({ token }) {
     if (!token) { navigate('/login'); return; }
     const decoded = jwtDecode(token);
     setCurrentUserId(decoded.userId);
-    fetch(`http://127.0.0.1:5000/api/requests?_t=${Date.now()}`, { 
+    fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/requests?_t=${Date.now()}`, { 
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store'
     })
@@ -287,7 +287,7 @@ export default function Requests({ token }) {
 
   const handleStatusUpdate = async (id, status) => {
     try {
-      await fetch(`http://127.0.0.1:5000/api/requests/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }) });
+      await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/requests/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }) });
       setRequests(requests.map(req => req._id === id ? { ...req, status } : req));
       toast.success(`Request has been ${status}.`);
     } catch(err) { toast.error("Failed to update status."); }
@@ -295,7 +295,7 @@ export default function Requests({ token }) {
 
   const viewContact = async (id) => {
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/requests/${id}/contact`, { headers: { Authorization: `Bearer ${token}` }});
+      const res = await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/requests/${id}/contact`, { headers: { Authorization: `Bearer ${token}` }});
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setContactInfo(data);
@@ -304,7 +304,7 @@ export default function Requests({ token }) {
 
   const handleMarkAsSent = async (requestId) => {
     try {
-      await fetch(`http://127.0.0.1:5000/api/requests/${requestId}/sent`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }});
+      await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/requests/${requestId}/sent`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }});
       setRequests(requests.map(req => req._id === requestId ? { ...req, deliveryStatus: 'sent' } : req));
       toast.success('Marked as sent! Waiting for receiver to confirm.');
     } catch (error) { toast.error(error.message || 'Failed to mark as sent'); }
@@ -316,7 +316,7 @@ export default function Requests({ token }) {
   const handleConfirmDelivery = async () => {
     if (!requestToDeliver) return;
     try {
-      await fetch(`http://127.0.0.1:5000/api/requests/${requestToDeliver._id}/receive`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }});
+      await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/requests/${requestToDeliver._id}/receive`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }});
       setRequests(requests.map(req => req._id === requestToDeliver._id ? { ...req, deliveryStatus: 'received' } : req));
       toast.success('Receipt confirmed! The transaction is complete.');
     } catch (error) { toast.error(error.message || 'Failed to confirm receipt'); }
@@ -330,7 +330,7 @@ export default function Requests({ token }) {
     const userToRateId = currentUserId === requestToRate.ownerId._id ? requestToRate.requesterId._id : requestToRate.ownerId._id;
     const isOwnerRating = currentUserId === requestToRate.ownerId._id;
     try {
-      await fetch(`http://127.0.0.1:5000/api/user/rate/${userToRateId}`, {
+      await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/user/rate/${userToRateId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ rating, comment, requestId: requestToRate._id })

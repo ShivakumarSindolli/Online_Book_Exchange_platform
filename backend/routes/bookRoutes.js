@@ -10,8 +10,10 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
   const { title, author, condition, type, price, city, state } = req.body;
   if (type === 'sell' && (!price || price <= 0)) return res.status(400).json({ message: 'Price is required for selling a book.' });
   try {
-    // Store the image path as '/uploads/filename' so the frontend can use it directly
-    const imageUrl = `/uploads/${req.file.filename}`;
+    // Store the image path as a Cloudinary URL or local file path
+    const imageUrl = (req.file.path && (req.file.path.startsWith('http://') || req.file.path.startsWith('https://')))
+      ? req.file.path
+      : `/uploads/${req.file.filename}`;
     const newBookData = { title, author, condition, type, price: type === 'sell' ? price : 0, city, state, userId: req.userId, imageUrl };
     const newBook = new Book(newBookData);
     const book = await newBook.save();

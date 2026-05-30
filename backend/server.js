@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-const db = 'mongodb://127.0.0.1:27017/bookExchangeDB'; // Using 127.0.0.1 instead of localhost for better IPv4 resolution
+const db = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bookExchangeDB';
 mongoose.connect(db)
   .then(() => console.log('MongoDB Connected successfully!'))
   .catch(err => {

@@ -42,7 +42,7 @@ export default function MyBooks({ token }) {
 
   const fetchMyBooks = useCallback(async () => {
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/books/my-books', {
+      const res = await fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/books/my-books', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch books');
@@ -65,7 +65,7 @@ export default function MyBooks({ token }) {
   const handleConfirmDelete = async () => {
     if (!bookToDelete) return;
     try {
-      const res = await fetch(`http://127.0.0.1:5000/api/books/${bookToDelete._id}`, {
+      const res = await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/books/${bookToDelete._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -288,7 +288,7 @@ export default function MyBooks({ token }) {
                   }}>
                     {book.imageUrl ? (
                       <img
-                        src={`http://127.0.0.1:5000${book.imageUrl}`}
+                        src={book.imageUrl.startsWith('http') ? book.imageUrl : `https://online-book-exchange-platform-hpp1.onrender.com${book.imageUrl}`}
                         alt={book.title}
                         style={{
                           width: '100%', height: '100%',

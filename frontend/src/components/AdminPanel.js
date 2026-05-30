@@ -10,7 +10,7 @@ import {
   ToggleRight, RefreshCw, BarChart3, MapPin, Eye
 } from 'lucide-react';
 
-const API = 'http://127.0.0.1:5000/api/admin';
+const API = 'https://online-book-exchange-platform-hpp1.onrender.com/api/admin';
 
 const tabs = [
   { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
@@ -243,7 +243,7 @@ function BooksTab({ token }) {
             <tbody>
               {books.map(b => (
                 <motion.tr key={b._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} layout>
-                  <td><div className="admin-book-cell">{b.imageUrl && <img src={`http://127.0.0.1:5000${b.imageUrl}`} alt="" className="admin-book-thumb" />}<span className="admin-book-title">{b.title}</span></div></td>
+                  <td><div className="admin-book-cell">{b.imageUrl && <img src={b.imageUrl.startsWith('http') ? b.imageUrl : `https://online-book-exchange-platform-hpp1.onrender.com${b.imageUrl}`} alt="" className="admin-book-thumb" />}<span className="admin-book-title">{b.title}</span></div></td>
                   <td>{b.author}</td>
                   <td><span className="admin-email">{b.userId?.username || 'N/A'}</span></td>
                   <td><span className={`admin-type-badge ${b.type}`}>{b.type === 'sell' ? '💰 Sale' : '🔄 Lend'}</span></td>

@@ -29,7 +29,7 @@ export default function Wishlist({ token }) {
     if (!token) return;
     setLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:5000/api/user/wishlist', {
+      const res = await fetch('https://online-book-exchange-platform-hpp1.onrender.com/api/user/wishlist', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch wishlist');
@@ -49,7 +49,7 @@ export default function Wishlist({ token }) {
   const handleConfirmRemove = async () => {
     if (!bookToRemove) return;
     try {
-      await fetch(`http://127.0.0.1:5000/api/user/wishlist/${bookToRemove._id}`, {
+      await fetch(`https://online-book-exchange-platform-hpp1.onrender.com/api/user/wishlist/${bookToRemove._id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -209,7 +209,7 @@ export default function Wishlist({ token }) {
                 }}>
                   {book.imageUrl ? (
                     <img
-                      src={`http://127.0.0.1:5000${book.imageUrl}`}
+                      src={book.imageUrl.startsWith('http') ? book.imageUrl : `https://online-book-exchange-platform-hpp1.onrender.com${book.imageUrl}`}
                       alt={book.title}
                       style={{
                         width: '100%', height: '100%',
