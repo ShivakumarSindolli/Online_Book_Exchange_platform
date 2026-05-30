@@ -4,6 +4,22 @@ import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { UserPlus, User, Mail, Lock, Phone, MapPin, BookOpen } from 'lucide-react';
 
+const Field = ({ id, name, type = 'text', placeholder, label, icon, value, onChange }) => (
+  <div className="form-group">
+    <label className="form-label" htmlFor={id}>
+      <span style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'middle' }}>{icon}</span>
+      {label}
+    </label>
+    <input
+      id={id} name={name} type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      className="form-input" required
+    />
+  </div>
+);
+
 export default function Register() {
   const [formData, setFormData] = useState({ username: '', email: '', password: '', phone: '', city: '', state: '' });
   const [loading, setLoading] = useState(false);
@@ -27,21 +43,6 @@ export default function Register() {
     finally { setLoading(false); }
   };
 
-  const Field = ({ id, name, type = 'text', placeholder, label, icon }) => (
-    <div className="form-group">
-      <label className="form-label" htmlFor={id}>
-        <span style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'middle' }}>{icon}</span>
-        {label}
-      </label>
-      <input
-        id={id} name={name} type={type}
-        placeholder={placeholder}
-        onChange={handleChange}
-        className="form-input" required
-      />
-    </div>
-  );
-
   return (
     <div className="auth-page">
       <motion.div
@@ -61,23 +62,23 @@ export default function Register() {
         <p className="auth-subtitle">Join the BookExchange community</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          <Field id="r-username" name="username" placeholder="johndoe"           label="Username"     icon={<User  size={11} />} />
-          <Field id="r-email"    name="email"    placeholder="you@example.com"   label="Email"        icon={<Mail  size={11} />} type="email" />
-          <Field id="r-password" name="password" placeholder="••••••••"          label="Password"     icon={<Lock  size={11} />} type="password" />
-          <Field id="r-phone"    name="phone"    placeholder="+91 99999 99999"   label="Phone Number" icon={<Phone size={11} />} type="tel" />
+          <Field id="r-username" name="username" placeholder="johndoe"           label="Username"     icon={<User  size={11} />} value={formData.username} onChange={handleChange} />
+          <Field id="r-email"    name="email"    placeholder="you@example.com"   label="Email"        icon={<Mail  size={11} />} type="email" value={formData.email} onChange={handleChange} />
+          <Field id="r-password" name="password" placeholder="••••••••"          label="Password"     icon={<Lock  size={11} />} type="password" value={formData.password} onChange={handleChange} />
+          <Field id="r-phone"    name="phone"    placeholder="+91 99999 99999"   label="Phone Number" icon={<Phone size={11} />} type="tel" value={formData.phone} onChange={handleChange} />
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div className="form-group">
               <label className="form-label" htmlFor="r-city">
                 <MapPin size={11} style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'middle' }} />City
               </label>
-              <input id="r-city" name="city" type="text" placeholder="Mumbai" onChange={handleChange} className="form-input" required />
+              <input id="r-city" name="city" type="text" placeholder="Mumbai" value={formData.city} onChange={handleChange} className="form-input" required />
             </div>
             <div className="form-group">
               <label className="form-label" htmlFor="r-state">
                 <MapPin size={11} style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: 'middle' }} />State
               </label>
-              <input id="r-state" name="state" type="text" placeholder="Maharashtra" onChange={handleChange} className="form-input" required />
+              <input id="r-state" name="state" type="text" placeholder="Maharashtra" value={formData.state} onChange={handleChange} className="form-input" required />
             </div>
           </div>
 
